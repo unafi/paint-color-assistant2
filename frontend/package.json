@@ -12,7 +12,9 @@
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
     "test:e2e": "vitest run src/test/e2e/browser-puppeteer.test.ts",
-    "test:browser": "npm run test:e2e"
+    "test:browser": "npm run test:e2e",
+    "deploy": "npm run build && gh-pages -d dist",
+    "predeploy": "npm run build"
   },
   "dependencies": {
     "autoprefixer": "^10.4.20",
