@@ -1,0 +1,272 @@
+/* 色調整コンポーネントのスタイル - コンテンツ幅に合わせた中央配置レイアウト */
+.color-controller {
+  padding: 0.5rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  background-color: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr; /* 中央をautoに変更してコンテンツ幅に合わせる */
+  gap: 0.5rem;
+  align-items: start;
+  min-height: 300px;
+}
+
+.color-controller.disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.color-controller__title {
+  grid-column: 1 / -1;
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #374151;
+  text-align: center;
+}
+
+/* 出発色表示 - 左側、Kの下位置まで高さを伸ばす */
+.color-controller__target-color {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  height: 100%; /* 親の高さに合わせる */
+}
+
+.color-controller__target-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  margin: 0;
+}
+
+.color-controller__target-swatch {
+  width: 100%;
+  flex: 1; /* 残りの高さを全て使用 */
+  min-height: 200px; /* 最小高さを設定 */
+  border: 2px solid #d1d5db;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.color-controller__target-swatch:hover {
+  border-color: #9ca3af;
+}
+
+/* 操作エリア - 中央、コンテンツに合わせた幅で中央寄せ */
+.color-controller__controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: auto; /* 固定幅からautoに変更 */
+  min-width: 180px; /* 最小幅を設定 */
+  max-width: 200px; /* 最大幅を制限 */
+  justify-self: center; /* グリッド内で中央寄せ */
+}
+
+/* 調整セクション - 上下余白0 */
+.color-controller__section {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.color-controller__section:first-child {
+  margin-bottom: 0;
+}
+
+.color-controller__section-title {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  text-align: center;
+  padding: 0.25rem 0;
+}
+
+/* 色調整コントロール - 縦並び、上下余白0 */
+.color-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* 個別の色調整行 - 上下余白0、右側の余白を削除 */
+.color-control {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.125rem 0; /* 左右のpaddingを削除 */
+  min-height: 28px;
+  justify-content: space-between; /* 要素を均等配置 */
+}
+
+/* 左側の色見本（フル値） */
+.color-control__full-sample {
+  width: 20px;
+  height: 20px;
+  border: 1px solid #d1d5db;
+  border-radius: 0.25rem;
+  flex-shrink: 0;
+}
+
+/* ラベル */
+.color-control__label {
+  font-weight: 500;
+  color: #374151;
+  min-width: 1rem;
+  text-align: center;
+  flex-shrink: 0;
+  font-size: 0.75rem;
+}
+
+/* 矢印ボタン */
+.color-control__button {
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.25rem;
+  background-color: #ffffff;
+  color: #374151;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.color-control__button:hover:not(:disabled) {
+  background-color: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.color-control__button:active:not(:disabled) {
+  background-color: #e5e7eb;
+}
+
+.color-control__button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 数値入力 - 幅を3文字分広げる */
+.color-control__input {
+  width: 4.5rem; /* 3remから4.5remに拡張（3文字分追加） */
+  padding: 0.25rem 0.375rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  text-align: center;
+  background-color: #ffffff;
+  flex-shrink: 0;
+}
+
+.color-control__input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 1px #3b82f6;
+}
+
+.color-control__input:disabled {
+  background-color: #f9fafb;
+  color: #6b7280;
+}
+
+/* 右側の色見本（現在値） */
+.color-control__current-sample {
+  width: 20px;
+  height: 20px;
+  border: 1px solid #d1d5db;
+  border-radius: 0.25rem;
+  flex-shrink: 0;
+}
+
+/* 結果色表示 - 右側、Kの下位置まで高さを伸ばす */
+.color-controller__result-color {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  height: 100%; /* 親の高さに合わせる */
+}
+
+.color-controller__result-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  margin: 0;
+}
+
+.color-controller__result-swatch {
+  width: 100%;
+  flex: 1; /* 残りの高さを全て使用 */
+  min-height: 200px; /* 最小高さを設定 */
+  border: 2px solid #d1d5db;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.color-controller__result-swatch:hover {
+  border-color: #9ca3af;
+}
+
+/* レスポンシブデザイン */
+@media (max-width: 767px) {
+  .color-controller {
+    grid-template-columns: 1fr; /* モバイルでは縦積み */
+    gap: 1rem;
+  }
+  
+  .color-controller__controls {
+    width: 100%; /* モバイルでは全幅 */
+    justify-self: stretch;
+  }
+  
+  .color-controller__target-swatch,
+  .color-controller__result-swatch {
+    min-height: 80px;
+  }
+  
+  .color-control__full-sample,
+  .color-control__current-sample {
+    width: 25px;
+    height: 25px;
+  }
+  
+  .color-control__input {
+    width: 4rem; /* モバイルでは少し小さく */
+  }
+}
+
+@media (min-width: 1024px) {
+  .color-controller {
+    padding: 1rem;
+    grid-template-columns: 1fr auto 1fr; /* 大画面でもautoを維持 */
+  }
+  
+  .color-controller__controls {
+    min-width: 200px;
+    max-width: 220px;
+  }
+  
+  .color-controller__target-swatch,
+  .color-controller__result-swatch {
+    min-height: 250px;
+  }
+  
+  .color-control__full-sample,
+  .color-control__current-sample {
+    width: 30px;
+    height: 30px;
+  }
+  
+  .color-control__input {
+    width: 5rem; /* 大画面ではさらに広く */
+  }
+}

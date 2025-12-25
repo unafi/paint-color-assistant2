@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>手動テスト - 画像アップロード機能</title>
+</head>
+<body>
+    <h1>手動テスト手順</h1>
+    
+    <h2>テスト1: PATH入力テスト</h2>
+    <ol>
+        <li>http://localhost:5173 にアクセス</li>
+        <li>PATH入力欄に以下のパスを入力: <code>D:\Downloads\AmazonPhotos (23)\IMG_7124.JPG</code></li>
+        <li>TABキーでフォーカスアウト</li>
+        <li>コンソールログを確認</li>
+        <li>ファイル選択ダイアログが自動で開くか確認</li>
+    </ol>
+    
+    <h2>テスト2: 参照ボタンテスト</h2>
+    <ol>
+        <li>参照ボタンをクリック</li>
+        <li>ファイル選択ダイアログが開くか確認</li>
+        <li>画像ファイルを選択</li>
+        <li>PATH欄にファイル名が表示されるか確認</li>
+        <li>プレビューが表示されるか確認</li>
+    </ol>
+    
+    <h2>期待される動作</h2>
+    <ul>
+        <li>PATH入力後のフォーカスアウトで、ファイル選択ダイアログが自動で開く</li>
+        <li>参照ボタンクリックで、ファイル選択ダイアログが開く</li>
+        <li>ファイル選択後、PATH欄にファイル名が表示される</li>
+        <li>ファイル選択後、画像プレビューが表示される</li>
+    </ul>
+    
+    <script>
+        console.log('🧪 手動テスト用ページが読み込まれました');
+        console.log('📍 メインアプリケーション: http://localhost:5173');
+    </script>
+</body>
+</html>

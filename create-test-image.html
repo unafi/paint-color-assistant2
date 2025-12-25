@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>テスト画像作成</title>
+</head>
+<body>
+    <h1>テスト画像作成</h1>
+    <canvas id="canvas" width="200" height="200" style="border: 1px solid black;"></canvas>
+    <br><br>
+    <button onclick="downloadImage()">画像をダウンロード</button>
+    
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // 背景を白で塗りつぶし
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, 200, 200);
+        
+        // 左上に赤い四角
+        ctx.fillStyle = '#FF0000';
+        ctx.fillRect(20, 20, 60, 60);
+        
+        // 右上に緑の四角
+        ctx.fillStyle = '#00FF00';
+        ctx.fillRect(120, 20, 60, 60);
+        
+        // 左下に青い四角
+        ctx.fillStyle = '#0000FF';
+        ctx.fillRect(20, 120, 60, 60);
+        
+        // 右下に黄色の四角
+        ctx.fillStyle = '#FFFF00';
+        ctx.fillRect(120, 120, 60, 60);
+        
+        // 中央に紫の円
+        ctx.fillStyle = '#800080';
+        ctx.beginPath();
+        ctx.arc(100, 100, 30, 0, 2 * Math.PI);
+        ctx.fill();
+        
+        function downloadImage() {
+            const link = document.createElement('a');
+            link.download = 'test_colors.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+    </script>
+</body>
+</html>

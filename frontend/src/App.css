@@ -1,0 +1,254 @@
+/* アプリケーション全体のスタイル */
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #f9fafb;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ヘッダー */
+.app__header {
+  background-color: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 1.5rem 2rem;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.app__title {
+  margin: 0 0 0.5rem 0;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.app__subtitle {
+  margin: 0;
+  font-size: 1rem;
+  color: #6b7280;
+  font-weight: 400;
+}
+
+/* メインコンテンツ */
+.app__main {
+  flex: 1;
+  padding: 1rem;
+  max-width: 100%;
+  margin: 0;
+  width: 100%;
+}
+
+/* PC版レイアウト - 50%分割、余白最小化 */
+.app__desktop-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  /* height制限を削除してコンテンツに応じた高さに */
+}
+
+.app__column {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  /* min-height制限を削除 */
+}
+
+.app__column--left {
+  /* 左カラム用のスタイル */
+}
+
+.app__column--right {
+  /* 右カラム用のスタイル */
+}
+
+/* スマホ版レイアウト */
+.app__mobile-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+/* 今後追加予定のコンポーネント */
+.app__future-components {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-top: 1rem;
+  /* フロートやposition指定を削除して通常のフローに */
+}
+
+.app__placeholder {
+  padding: 2rem;
+  border: 2px dashed #d1d5db;
+  border-radius: 0.5rem;
+  background-color: #ffffff;
+  text-align: center;
+  color: #6b7280;
+}
+
+.app__placeholder h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.app__placeholder p {
+  margin: 0 0 1rem 0;
+  font-size: 0.875rem;
+}
+
+.app__placeholder-content {
+  margin-top: 1rem;
+}
+
+/* 色比較表示 */
+.app__color-comparison {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.app__color-sample {
+  padding: 1rem 1.5rem;
+  border: 2px solid #d1d5db;
+  border-radius: 0.5rem;
+  color: #ffffff;
+  font-weight: 600;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  min-width: 200px;
+  text-align: center;
+}
+
+.app__arrow {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #374151;
+}
+
+/* フッター */
+.app__footer {
+  background-color: #ffffff;
+  border-top: 1px solid #e5e7eb;
+  padding: 1rem 2rem;
+  text-align: center;
+  color: #6b7280;
+  font-size: 0.875rem;
+  margin-top: 2rem;
+  /* フロートやposition指定なし、通常のフローで配置 */
+}
+
+/* レスポンシブレイアウト */
+.responsive-layout--mobile .app__desktop-layout {
+  display: none;
+}
+
+.responsive-layout--mobile .app__mobile-layout {
+  display: flex;
+}
+
+.responsive-layout--desktop .app__mobile-layout {
+  display: none;
+}
+
+.responsive-layout--desktop .app__desktop-layout {
+  display: grid;
+}
+
+.responsive-layout--tablet .app__desktop-layout {
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+/* モバイル向けの調整 */
+@media (max-width: 767px) {
+  .app__header {
+    padding: 1rem;
+  }
+  
+  .app__title {
+    font-size: 1.5rem;
+  }
+  
+  .app__subtitle {
+    font-size: 0.875rem;
+  }
+  
+  .app__main {
+    padding: 1rem;
+  }
+  
+  .app__color-comparison {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .app__color-sample {
+    min-width: auto;
+    width: 100%;
+  }
+  
+  .app__arrow {
+    transform: rotate(90deg);
+  }
+}
+
+/* タブレット向けの調整 */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .app__desktop-layout {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+/* 大画面向けの調整 */
+@media (min-width: 1400px) {
+  .app__main {
+    padding: 3rem;
+  }
+  
+  .app__desktop-layout {
+    gap: 3rem;
+  }
+}
+
+/* 塗料混合セクション - 横並びレイアウト */
+.app__mixing-section {
+  display: flex;
+  gap: 1rem;
+  margin: 1rem 0;
+  align-items: flex-start;
+}
+
+.app__mixing-display {
+  flex: 1;
+  min-width: 0; /* flexアイテムの縮小を許可 */
+}
+
+.app__mixing-controller {
+  flex: 1;
+  min-width: 0; /* flexアイテムの縮小を許可 */
+}
+
+/* モバイル版では縦積みに変更 */
+@media (max-width: 768px) {
+  .app__mixing-section {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .app__mixing-display,
+  .app__mixing-controller {
+    flex: none;
+    width: 100%;
+  }
+}
