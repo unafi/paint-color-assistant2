@@ -1,0 +1,135 @@
+/**
+ * コンパクト塗料調整バーのスタイル
+ */
+
+.compact-mixing-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
+  border-bottom: 1px solid #f3f4f6;
+  min-height: 2rem;
+}
+
+.compact-mixing-bar:last-child {
+  border-bottom: none;
+}
+
+.bar-label {
+  width: 80px;
+  font-weight: 500;
+  color: #374151;
+  flex-shrink: 0;
+  font-size: 0.9rem;
+}
+
+.bar-graph {
+  width: 280px;
+  font-family: monospace;
+  font-size: 12px;
+  flex-shrink: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  line-height: 1;
+  transition: all 0.3s ease-in-out;
+  display: flex;
+  align-items: center;
+}
+
+.bar-block {
+  display: inline-block;
+  font-size: 12px;
+  line-height: 1;
+  margin-right: 1px;
+}
+
+.bar-block--white {
+  color: #000000;
+  border: 1px solid #000000;
+  font-weight: bold;
+}
+
+.bar-graph-empty {
+  color: transparent;
+}
+
+.bar-value {
+  width: 60px;
+  text-align: right;
+  font-weight: 600;
+  color: #374151;
+  flex-shrink: 0;
+  font-size: 0.9rem;
+}
+
+.bar-value.positive {
+  color: #dc2626;
+}
+
+.bar-value.negative {
+  color: #2563eb;
+}
+
+/* バーグラフアニメーション */
+.bar-graph {
+  position: relative;
+}
+
+.bar-graph::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(5, 150, 105, 0.1));
+  animation: barFillAnimation 0.5s ease-out forwards;
+}
+
+@keyframes barFillAnimation {
+  from { 
+    width: 0; 
+  }
+  to { 
+    width: 100%; 
+  }
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+  .compact-mixing-bar {
+    gap: 0.25rem;
+  }
+  
+  .bar-label {
+    width: 60px;
+    font-size: 0.8rem;
+  }
+  
+  .bar-graph {
+    width: 220px;
+  }
+  
+  .bar-block {
+    font-size: 10px;
+  }
+  
+  .bar-value {
+    width: 50px;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .bar-label {
+    width: 50px;
+  }
+  
+  .bar-graph {
+    width: 180px;
+  }
+  
+  .bar-value {
+    width: 45px;
+  }
+}

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import type { UILayoutModel } from '../types/ui';
 
 /**
  * デバイスタイプの定義
@@ -24,6 +25,11 @@ const BREAKPOINTS = {
   mobile: 768,
   tablet: 1024
 } as const;
+
+/**
+ * UI改善用のブレークポイント（色比較表示用）
+ */
+const UI_IMPROVEMENT_BREAKPOINT = 1024;
 
 /**
  * レスポンシブレイアウト管理フック
@@ -141,4 +147,53 @@ export function getImageDisplaySize(deviceType: DeviceType, screenWidth: number)
  */
 export function getFileInputType(deviceType: DeviceType): 'path-input' | 'photo-button' {
   return deviceType === 'mobile' ? 'photo-button' : 'path-input';
+}
+
+/**
+ * UI改善用のレスポンシブレイアウト情報を取得
+ * @param screenWidth - 画面幅
+ * @returns UILayoutModel
+ */
+export function getUILayoutModel(screenWidth: number): UILayoutModel {
+  try {
+    // 画面幅の妥当性チェック
+    const validScreenWidth = typeof screenWidth === 'number' && screenWidth > 0 ? screenWidth : 1024;
+    const isMobile = validScreenWidth < UI_IMPROVEMENT_BREAKPOINT;
+    
+    return {
+      isMobile,
+      screenWidth: validScreenWidth,
+      breakpoint: UI_IMPROVEMENT_BREAKPOINT,
+      comparisonLayout: isMobile ? 'vertical' : 'horizontal'
+    };
+  } catch (error) {
+    console.warn('UILayoutModel取得エラー、デフォルト値を使用:', error);
+    // エラー時はデスクトップレイアウトにフォールバック
+    return {
+      isMobile: false,
+      screenWidth: 1024,
+      breakpoint: UI_IMPROVEMENT_BREAKPOINT,
+      comparisonLayout: 'horizontal'
+    };
+  }
+}
+
+/**
+ * 色比較表示のレスポンシブレイアウトを取得
+ * @param screenWidth - 画面幅
+ * @returns レイアウト情報
+ */
+export function getColorComparisonLayout(screenWidth: number): { mode: 'horizontal' | 'vertical' } {
+  try {
+    const validScreenWidth = typeof screenWidth === 'number' && screenWidth > 0 ? screenWidth : 1024;
+    return {
+      mode: validScreenWidth >= UI_IMPROVEMENT_BREAKPOINT ? 'horizontal' : 'vertical'
+    };
+  } catch (error) {
+    console.warn('ColorComparisonLayout取得エラー、デフォルト値を使用:', error);
+    // エラー時は横並びレイアウトにフォールバック
+    return {
+      mode: 'horizontal'
+    };
+  }
 }

@@ -1,12 +1,13 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import type { ColorModel } from './types/color';
 import type { ImageData } from './types/image';
 import { ColorController } from './components/ColorController/ColorController';
 import { ColorMixingDisplay } from './components/ColorMixingDisplay/ColorMixingDisplay';
-import { ColorPreviewController } from './components/ColorPreviewController/ColorPreviewController';
+import { PaintMixingController } from './components/PaintMixingController/PaintMixingController';
 import { ImageUpload } from './components/ImageUpload/ImageUpload';
 import { useResponsiveLayout, getDeviceStyleClass } from './hooks/useResponsiveLayout';
 import { createColorModel } from './utils/colorUtils';
+import { PaintMixingCalculator } from './utils/paintMixing';
 import { isElectronEnvironment } from './utils/electronUtils';
 import './App.css';
 
@@ -23,6 +24,14 @@ function App() {
   const [resultColorA, setResultColorA] = useState<ColorModel>(createColorModel({ r: 128, g: 128, b: 128 }));
   const [originalColorB, setOriginalColorB] = useState<ColorModel>(createColorModel({ r: 200, g: 150, b: 100 }));
   const [resultColorB, setResultColorB] = useState<ColorModel>(createColorModel({ r: 200, g: 150, b: 100 }));
+  
+  // 混色コントローラの結果色
+  const [mixingResultColor, setMixingResultColor] = useState<ColorModel>(resultColorA);
+  
+  // 算出色（塗料調整の逆算結果）
+  const calculatedColor = useMemo(() => {
+    return PaintMixingCalculator.calculateReverseMixingColor(resultColorA, resultColorB);
+  }, [resultColorA, resultColorB]);
 
   // Electron環境の初期化チェック
   useEffect(() => {
@@ -86,6 +95,14 @@ function App() {
     console.log('🎨 色B調整 (RGB/CMYK変更):', color);
     // RGB/CMYK調整時は結果色のみ更新
     setResultColorB(color);
+  }, []);
+
+  /**
+   * 混色結果変更ハンドラ
+   */
+  const handleMixingResultChange = useCallback((color: ColorModel) => {
+    console.log('🎨 混色結果変更:', color);
+    setMixingResultColor(color);
   }, []);
 
   return (
@@ -206,30 +223,7 @@ function App() {
           </div>
         )}
 
-        {/* 色比較テスト */}
-        <div className="app__future-components">
-          <div className="app__placeholder">
-            <h3>🔬 色比較表示テスト</h3>
-            <p>現在の色設定と目標色の比較表示</p>
-            <div className="app__placeholder-content">
-              <div className="app__color-comparison">
-                <div className="app__color-sample" style={{ backgroundColor: `rgb(${resultColorA.r}, ${resultColorA.g}, ${resultColorA.b})` }}>
-                  色A: RGB({resultColorA.r}, {resultColorA.g}, {resultColorA.b})
-                  <br />
-                  CMYK({resultColorA.c.toFixed(1)}, {resultColorA.m.toFixed(1)}, {resultColorA.y.toFixed(1)}, {resultColorA.k.toFixed(1)})
-                </div>
-                <span className="app__arrow">→</span>
-                <div className="app__color-sample" style={{ backgroundColor: `rgb(${resultColorB.r}, ${resultColorB.g}, ${resultColorB.b})` }}>
-                  色B: RGB({resultColorB.r}, {resultColorB.g}, {resultColorB.b})
-                  <br />
-                  CMYK({resultColorB.c.toFixed(1)}, {resultColorB.m.toFixed(1)}, {resultColorB.y.toFixed(1)}, {resultColorB.k.toFixed(1)})
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* 塗料混合表示と混合結果確認を横並び配置 */}
+        {/* 塗料混合表示と混色コントローラを横並び配置 */}
         <div className="app__mixing-section">
           <div className="app__mixing-display">
             <ColorMixingDisplay
@@ -239,8 +233,11 @@ function App() {
           </div>
           
           <div className="app__mixing-controller">
-            <ColorPreviewController
+            <PaintMixingController
               baseColor={resultColorA}
+              targetColor={resultColorB}
+              calculatedColor={calculatedColor}
+              onChange={handleMixingResultChange}
             />
           </div>
         </div>

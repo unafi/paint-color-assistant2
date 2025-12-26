@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useEffect, useCallback, useRef } from 'react';
 import type { ColorModel, ColorControllerProps } from '../../types/color';
 import { useResponsiveLayout } from '../../hooks/useResponsiveLayout';
 import { ColorSpaceConverter, colorToCss, createSingleColorSample, createCmykSingleColorSample } from '../../utils/colorUtils';
@@ -19,8 +19,8 @@ export const ColorController: React.FC<ColorControllerProps> = ({
   const { isMobile } = useResponsiveLayout();
   
   // 長押し用のref
-  const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const longPressIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const longPressTimerRef = useRef<number | null>(null);
+  const longPressIntervalRef = useRef<number | null>(null);
   
   // 更新ループ防止用のref
   const isUpdatingRef = useRef<boolean>(false);
@@ -82,8 +82,8 @@ export const ColorController: React.FC<ColorControllerProps> = ({
     isUpdatingRef.current = true;
     
     try {
-      // CMYK値を制限（0-100%、按分なし）
-      const clampedValue = Math.max(0, Math.min(100, Math.round(value * 10) / 10));
+      // CMYK値を制限（0-100%、整数に四捨五入）
+      const clampedValue = Math.max(0, Math.min(100, Math.round(value)));
       
       // 新しいCMYK値を作成（按分せず、そのまま設定）
       const newCmyk = {
@@ -148,8 +148,8 @@ export const ColorController: React.FC<ColorControllerProps> = ({
     clearLongPressTimers();
 
     // 500ms後に連続実行開始
-    longPressTimerRef.current = setTimeout(() => {
-      longPressIntervalRef.current = setInterval(() => {
+    longPressTimerRef.current = window.setTimeout(() => {
+      longPressIntervalRef.current = window.setInterval(() => {
         handleValueAdjust(type, component, delta);
       }, 50); // 50msごとに実行（より高速）
     }, 300); // 300ms後に開始（より早く）
@@ -280,13 +280,13 @@ export const ColorController: React.FC<ColorControllerProps> = ({
                 {isMobile && (
                   <button
                     className="color-control__button"
-                    onMouseDown={() => handleLongPressStart('cmyk', component, -0.1)}
+                    onMouseDown={() => handleLongPressStart('cmyk', component, -1)}
                     onMouseUp={handleLongPressEnd}
                     onMouseLeave={handleLongPressEnd}
-                    onTouchStart={() => handleLongPressStart('cmyk', component, -0.1)}
+                    onTouchStart={() => handleLongPressStart('cmyk', component, -1)}
                     onTouchEnd={handleLongPressEnd}
                     disabled={disabled || resultColor[component] <= 0}
-                    title="0.1%減らす（長押しで連続）"
+                    title="1%減らす（長押しで連続）"
                   >
                     ◀
                   </button>
@@ -296,11 +296,11 @@ export const ColorController: React.FC<ColorControllerProps> = ({
                 <input
                   type="number"
                   className="color-control__input"
-                  value={resultColor[component].toFixed(1)}
-                  onChange={(e) => handleCmykChange(component, parseFloat(e.target.value) || 0)}
-                  min="0.0"
-                  max="100.0"
-                  step="0.1"
+                  value={Math.round(resultColor[component])}
+                  onChange={(e) => handleCmykChange(component, parseInt(e.target.value) || 0)}
+                  min="0"
+                  max="100"
+                  step="1"
                   disabled={disabled}
                 />
                 
@@ -308,13 +308,13 @@ export const ColorController: React.FC<ColorControllerProps> = ({
                 {isMobile && (
                   <button
                     className="color-control__button"
-                    onMouseDown={() => handleLongPressStart('cmyk', component, 0.1)}
+                    onMouseDown={() => handleLongPressStart('cmyk', component, 1)}
                     onMouseUp={handleLongPressEnd}
                     onMouseLeave={handleLongPressEnd}
-                    onTouchStart={() => handleLongPressStart('cmyk', component, 0.1)}
+                    onTouchStart={() => handleLongPressStart('cmyk', component, 1)}
                     onTouchEnd={handleLongPressEnd}
                     disabled={disabled || resultColor[component] >= 100}
-                    title="0.1%増やす（長押しで連続）"
+                    title="1%増やす（長押しで連続）"
                   >
                     ▶
                   </button>
@@ -324,7 +324,7 @@ export const ColorController: React.FC<ColorControllerProps> = ({
                 <div 
                   className="color-control__current-sample"
                   style={{ backgroundColor: createCmykSingleColorSample(component, resultColor[component], resultColor.k) }}
-                  title={`${component.toUpperCase()}:${resultColor[component].toFixed(1)}%の色`}
+                  title={`${component.toUpperCase()}:${Math.round(resultColor[component])}%の色`}
                 />
               </div>
             ))}
@@ -338,7 +338,7 @@ export const ColorController: React.FC<ColorControllerProps> = ({
         <div 
           className="color-controller__result-swatch"
           style={{ backgroundColor: colorToCss(resultColor) }}
-          title={`RGB(${resultColor.r}, ${resultColor.g}, ${resultColor.b}) / CMYK(${resultColor.c.toFixed(1)}, ${resultColor.m.toFixed(1)}, ${resultColor.y.toFixed(1)}, ${resultColor.k.toFixed(1)})`}
+          title={`RGB(${resultColor.r}, ${resultColor.g}, ${resultColor.b}) / CMYK(${Math.round(resultColor.c)}, ${Math.round(resultColor.m)}, ${Math.round(resultColor.y)}, ${Math.round(resultColor.k)})`}
         />
       </div>
     </div>
