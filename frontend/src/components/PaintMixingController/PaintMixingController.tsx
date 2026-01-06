@@ -2,6 +2,8 @@ import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import type { ColorModel } from '../../types/color';
 import { colorToCss } from '../../utils/colorUtils';
 import { PaintMixingCalculator } from '../../utils/paintMixing';
+import { useResponsiveLayout } from '../../hooks/useResponsiveLayout';
+import { useLongPress } from '../../hooks/useLongPress';
 import './PaintMixingController.css';
 
 /**
@@ -152,6 +154,8 @@ export const PaintMixingController: React.FC<PaintMixingControllerProps> = ({
   calculatedColor,
   onChange
 }) => {
+  const { isMobile } = useResponsiveLayout();
+
   // 混色調整値（増分）
   const [adjustments, setAdjustments] = useState<MixingAdjustments>({
     cyan: 0,
@@ -216,6 +220,12 @@ export const PaintMixingController: React.FC<PaintMixingControllerProps> = ({
     type: keyof MixingAdjustments,
     value: number
   ) => {
+    // 入力値の検証
+    if (isNaN(value) || !isFinite(value)) {
+      // 無効な値の場合は0にリセット
+      value = 0;
+    }
+    
     // 実際の塗料は加算のみ可能（0-100%）
     const clampedValue = Math.max(0, Math.min(100, Math.round(value)));
     
@@ -224,6 +234,64 @@ export const PaintMixingController: React.FC<PaintMixingControllerProps> = ({
       [type]: clampedValue
     }));
   }, []);
+
+  /**
+   * 各塗料成分用の長押しハンドラを事前に生成
+   */
+  const cyanHandlers = useLongPress({
+    currentValue: adjustments.cyan,
+    onValueChange: (newValue: number) => {
+      handleAdjustmentChange('cyan', newValue);
+    },
+    adjustValue: (currentValue: number, delta: number) => {
+      return Math.max(0, Math.min(100, currentValue + delta));
+    },
+    disabled: false
+  });
+
+  const magentaHandlers = useLongPress({
+    currentValue: adjustments.magenta,
+    onValueChange: (newValue: number) => {
+      handleAdjustmentChange('magenta', newValue);
+    },
+    adjustValue: (currentValue: number, delta: number) => {
+      return Math.max(0, Math.min(100, currentValue + delta));
+    },
+    disabled: false
+  });
+
+  const yellowHandlers = useLongPress({
+    currentValue: adjustments.yellow,
+    onValueChange: (newValue: number) => {
+      handleAdjustmentChange('yellow', newValue);
+    },
+    adjustValue: (currentValue: number, delta: number) => {
+      return Math.max(0, Math.min(100, currentValue + delta));
+    },
+    disabled: false
+  });
+
+  const blackHandlers = useLongPress({
+    currentValue: adjustments.black,
+    onValueChange: (newValue: number) => {
+      handleAdjustmentChange('black', newValue);
+    },
+    adjustValue: (currentValue: number, delta: number) => {
+      return Math.max(0, Math.min(100, currentValue + delta));
+    },
+    disabled: false
+  });
+
+  const whiteHandlers = useLongPress({
+    currentValue: adjustments.white,
+    onValueChange: (newValue: number) => {
+      handleAdjustmentChange('white', newValue);
+    },
+    adjustValue: (currentValue: number, delta: number) => {
+      return Math.max(0, Math.min(100, currentValue + delta));
+    },
+    disabled: false
+  });
 
   /**
    * 白黒相互作用の計算
@@ -236,167 +304,377 @@ export const PaintMixingController: React.FC<PaintMixingControllerProps> = ({
     <div className="paint-mixing-controller">
       <h3 className="paint-mixing-controller__title">🎨 混色コントローラ</h3>
       
-      <div className="paint-mixing-controller__layout">
-        {/* 左列：出発色（上）+ 算出色（下） */}
-        <div className="paint-mixing-controller__left-column">
-          <div className="color-display color-display--top">
-            <h4>出発色</h4>
-            <div 
-              className="color-swatch color-swatch--large"
-              style={{ backgroundColor: colorToCss(baseColor) }}
-              title={`RGB(${baseColor.r}, ${baseColor.g}, ${baseColor.b})`}
-            />
-          </div>
-          
-          <div className="color-display color-display--bottom">
-            <h4>算出色</h4>
-            <div 
-              className="color-swatch color-swatch--large"
-              style={{ backgroundColor: colorToCss(calculatedColor) }}
-              title={`RGB(${calculatedColor.r}, ${calculatedColor.g}, ${calculatedColor.b})`}
-            />
-          </div>
+      {/* 左列：出発色（上）+ 算出色（下） */}
+      <div className="paint-mixing-controller__left-column">
+        <div className="color-display color-display--top">
+          <h4>出発色</h4>
+          <div 
+            className="color-swatch color-swatch--large"
+            style={{ backgroundColor: colorToCss(baseColor) }}
+            title={`RGB(${baseColor.r}, ${baseColor.g}, ${baseColor.b})`}
+          />
         </div>
+        
+        <div className="color-display color-display--bottom">
+          <h4>算出色</h4>
+          <div 
+            className="color-swatch color-swatch--large"
+            style={{ backgroundColor: colorToCss(calculatedColor) }}
+            title={`RGB(${calculatedColor.r}, ${calculatedColor.g}, ${calculatedColor.b})`}
+          />
+        </div>
+      </div>
 
-        {/* 中央列：CMYK調整（固定幅、調整前後の値を含む） */}
-        <div className="paint-mixing-controller__center-column">
-          <h4 className="center-column-title">CMYK調整</h4>
-          
+      {/* 中央列：CMYK調整（固定幅、調整前後の値を含む） */}
+      <div className="paint-mixing-controller__center-column">
+        <h4 className="center-column-title">CMYK調整</h4>
+        
+        <div className="color-controls">
           {/* シアン */}
-          <div className="adjustment-row">
-            <div className="adjustment-left">
-              <span className="before-value">{Math.round(baseColor.c)}</span>
-              <div className="color-indicator" style={{ backgroundColor: '#00FFFF' }} />
-            </div>
-            <div className="adjustment-center">
-              <span className="label">シアン</span>
-              <input
-                type="number"
-                min="0"
-                max="100"
-                value={adjustments.cyan}
-                onChange={(e) => handleAdjustmentChange('cyan', parseInt(e.target.value) || 0)}
-                className="adjustment-input"
-              />
-            </div>
-            <div className="adjustment-right">
-              <div className="color-indicator" style={{ backgroundColor: '#00FFFF' }} />
-              <span className="after-value">{Math.round(baseColor.c) + adjustments.cyan}</span>
-            </div>
+          <div className="color-control">
+            <div 
+              className="color-control__full-sample"
+              style={{ backgroundColor: '#00FFFF' }}
+              title="シアン:100%の色"
+            />
+            <span className="color-control__label">C</span>
+            {isMobile && (
+              <button
+                className="color-control__button"
+                onTouchStart={(e) => {
+                  e.preventDefault();
+                  cyanHandlers.handleLongPressStart(-1);
+                }}
+                onTouchEnd={(e) => {
+                  e.preventDefault();
+                  cyanHandlers.handleLongPressEnd();
+                }}
+                onTouchCancel={(e) => {
+                  e.preventDefault();
+                  cyanHandlers.handleLongPressEnd();
+                }}
+                disabled={adjustments.cyan <= 0}
+                title="1%減らす（長押しで連続）"
+              >
+                ◀
+              </button>
+            )}
+            <input
+              type="number"
+              min="0"
+              max="100"
+              value={adjustments.cyan}
+              onChange={(e) => handleAdjustmentChange('cyan', parseInt(e.target.value) || 0)}
+              className="color-control__input"
+            />
+            {isMobile && (
+              <button
+                className="color-control__button"
+                onTouchStart={(e) => {
+                  e.preventDefault();
+                  cyanHandlers.handleLongPressStart(1);
+                }}
+                onTouchEnd={(e) => {
+                  e.preventDefault();
+                  cyanHandlers.handleLongPressEnd();
+                }}
+                onTouchCancel={(e) => {
+                  e.preventDefault();
+                  cyanHandlers.handleLongPressEnd();
+                }}
+                disabled={adjustments.cyan >= 100}
+                title="1%増やす（長押しで連続）"
+              >
+                ▶
+              </button>
+            )}
+            <div 
+              className="color-control__current-sample"
+              style={{ backgroundColor: '#00FFFF' }}
+              title={`シアン:${adjustments.cyan}%の色`}
+            />
           </div>
 
           {/* マゼンタ */}
-          <div className="adjustment-row">
-            <div className="adjustment-left">
-              <span className="before-value">{Math.round(baseColor.m)}</span>
-              <div className="color-indicator" style={{ backgroundColor: '#FF00FF' }} />
-            </div>
-            <div className="adjustment-center">
-              <span className="label">マゼンタ</span>
-              <input
-                type="number"
-                min="0"
-                max="100"
-                value={adjustments.magenta}
-                onChange={(e) => handleAdjustmentChange('magenta', parseInt(e.target.value) || 0)}
-                className="adjustment-input"
-              />
-            </div>
-            <div className="adjustment-right">
-              <div className="color-indicator" style={{ backgroundColor: '#FF00FF' }} />
-              <span className="after-value">{Math.round(baseColor.m) + adjustments.magenta}</span>
-            </div>
+          <div className="color-control">
+            <div 
+              className="color-control__full-sample"
+              style={{ backgroundColor: '#FF00FF' }}
+              title="マゼンタ:100%の色"
+            />
+            <span className="color-control__label">M</span>
+            {isMobile && (
+              <button
+                className="color-control__button"
+                onTouchStart={(e) => {
+                  e.preventDefault();
+                  magentaHandlers.handleLongPressStart(-1);
+                }}
+                onTouchEnd={(e) => {
+                  e.preventDefault();
+                  magentaHandlers.handleLongPressEnd();
+                }}
+                onTouchCancel={(e) => {
+                  e.preventDefault();
+                  magentaHandlers.handleLongPressEnd();
+                }}
+                disabled={adjustments.magenta <= 0}
+                title="1%減らす（長押しで連続）"
+              >
+                ◀
+              </button>
+            )}
+            <input
+              type="number"
+              min="0"
+              max="100"
+              value={adjustments.magenta}
+              onChange={(e) => handleAdjustmentChange('magenta', parseInt(e.target.value) || 0)}
+              className="color-control__input"
+            />
+            {isMobile && (
+              <button
+                className="color-control__button"
+                onTouchStart={(e) => {
+                  e.preventDefault();
+                  magentaHandlers.handleLongPressStart(1);
+                }}
+                onTouchEnd={(e) => {
+                  e.preventDefault();
+                  magentaHandlers.handleLongPressEnd();
+                }}
+                onTouchCancel={(e) => {
+                  e.preventDefault();
+                  magentaHandlers.handleLongPressEnd();
+                }}
+                disabled={adjustments.magenta >= 100}
+                title="1%増やす（長押しで連続）"
+              >
+                ▶
+              </button>
+            )}
+            <div 
+              className="color-control__current-sample"
+              style={{ backgroundColor: '#FF00FF' }}
+              title={`マゼンタ:${adjustments.magenta}%の色`}
+            />
           </div>
 
           {/* イエロー */}
-          <div className="adjustment-row">
-            <div className="adjustment-left">
-              <span className="before-value">{Math.round(baseColor.y)}</span>
-              <div className="color-indicator" style={{ backgroundColor: '#FFFF00' }} />
-            </div>
-            <div className="adjustment-center">
-              <span className="label">イエロー</span>
-              <input
-                type="number"
-                min="0"
-                max="100"
-                value={adjustments.yellow}
-                onChange={(e) => handleAdjustmentChange('yellow', parseInt(e.target.value) || 0)}
-                className="adjustment-input"
-              />
-            </div>
-            <div className="adjustment-right">
-              <div className="color-indicator" style={{ backgroundColor: '#FFFF00' }} />
-              <span className="after-value">{Math.round(baseColor.y) + adjustments.yellow}</span>
-            </div>
+          <div className="color-control">
+            <div 
+              className="color-control__full-sample"
+              style={{ backgroundColor: '#FFFF00' }}
+              title="イエロー:100%の色"
+            />
+            <span className="color-control__label">Y</span>
+            {isMobile && (
+              <button
+                className="color-control__button"
+                onTouchStart={(e) => {
+                  e.preventDefault();
+                  yellowHandlers.handleLongPressStart(-1);
+                }}
+                onTouchEnd={(e) => {
+                  e.preventDefault();
+                  yellowHandlers.handleLongPressEnd();
+                }}
+                onTouchCancel={(e) => {
+                  e.preventDefault();
+                  yellowHandlers.handleLongPressEnd();
+                }}
+                disabled={adjustments.yellow <= 0}
+                title="1%減らす（長押しで連続）"
+              >
+                ◀
+              </button>
+            )}
+            <input
+              type="number"
+              min="0"
+              max="100"
+              value={adjustments.yellow}
+              onChange={(e) => handleAdjustmentChange('yellow', parseInt(e.target.value) || 0)}
+              className="color-control__input"
+            />
+            {isMobile && (
+              <button
+                className="color-control__button"
+                onTouchStart={(e) => {
+                  e.preventDefault();
+                  yellowHandlers.handleLongPressStart(1);
+                }}
+                onTouchEnd={(e) => {
+                  e.preventDefault();
+                  yellowHandlers.handleLongPressEnd();
+                }}
+                onTouchCancel={(e) => {
+                  e.preventDefault();
+                  yellowHandlers.handleLongPressEnd();
+                }}
+                disabled={adjustments.yellow >= 100}
+                title="1%増やす（長押しで連続）"
+              >
+                ▶
+              </button>
+            )}
+            <div 
+              className="color-control__current-sample"
+              style={{ backgroundColor: '#FFFF00' }}
+              title={`イエロー:${adjustments.yellow}%の色`}
+            />
           </div>
 
           {/* 黒 */}
-          <div className="adjustment-row">
-            <div className="adjustment-left">
-              <span className="before-value">{Math.round(baseColor.k)}</span>
-              <div className="color-indicator" style={{ backgroundColor: '#000000' }} />
-            </div>
-            <div className="adjustment-center">
-              <span className="label">黒</span>
-              <input
-                type="number"
-                min="0"
-                max="100"
-                value={adjustments.black}
-                onChange={(e) => handleAdjustmentChange('black', parseInt(e.target.value) || 0)}
-                className="adjustment-input"
-              />
-            </div>
-            <div className="adjustment-right">
-              <div className="color-indicator" style={{ backgroundColor: '#000000' }} />
-              <span className="after-value">{Math.round(baseColor.k) + adjustments.black}</span>
-            </div>
+          <div className="color-control">
+            <div 
+              className="color-control__full-sample"
+              style={{ backgroundColor: '#000000' }}
+              title="黒:100%の色"
+            />
+            <span className="color-control__label">K</span>
+            {isMobile && (
+              <button
+                className="color-control__button"
+                onTouchStart={(e) => {
+                  e.preventDefault();
+                  blackHandlers.handleLongPressStart(-1);
+                }}
+                onTouchEnd={(e) => {
+                  e.preventDefault();
+                  blackHandlers.handleLongPressEnd();
+                }}
+                onTouchCancel={(e) => {
+                  e.preventDefault();
+                  blackHandlers.handleLongPressEnd();
+                }}
+                disabled={adjustments.black <= 0}
+                title="1%減らす（長押しで連続）"
+              >
+                ◀
+              </button>
+            )}
+            <input
+              type="number"
+              min="0"
+              max="100"
+              value={adjustments.black}
+              onChange={(e) => handleAdjustmentChange('black', parseInt(e.target.value) || 0)}
+              className="color-control__input"
+            />
+            {isMobile && (
+              <button
+                className="color-control__button"
+                onTouchStart={(e) => {
+                  e.preventDefault();
+                  blackHandlers.handleLongPressStart(1);
+                }}
+                onTouchEnd={(e) => {
+                  e.preventDefault();
+                  blackHandlers.handleLongPressEnd();
+                }}
+                onTouchCancel={(e) => {
+                  e.preventDefault();
+                  blackHandlers.handleLongPressEnd();
+                }}
+                disabled={adjustments.black >= 100}
+                title="1%増やす（長押しで連続）"
+              >
+                ▶
+              </button>
+            )}
+            <div 
+              className="color-control__current-sample"
+              style={{ backgroundColor: '#000000' }}
+              title={`黒:${adjustments.black}%の色`}
+            />
           </div>
 
           {/* 白 */}
-          <div className="adjustment-row">
-            <div className="adjustment-left">
-              <span className="before-value">0</span>
-              <div className="color-indicator" style={{ backgroundColor: '#FFFFFF', border: '1px solid #ccc' }} />
-            </div>
-            <div className="adjustment-center">
-              <span className="label">白</span>
-              <input
-                type="number"
-                min="0"
-                max="100"
-                value={adjustments.white}
-                onChange={(e) => handleAdjustmentChange('white', parseInt(e.target.value) || 0)}
-                className="adjustment-input"
-              />
-            </div>
-            <div className="adjustment-right">
-              <div className="color-indicator" style={{ backgroundColor: '#FFFFFF', border: '1px solid #ccc' }} />
-              <span className="after-value">{adjustments.white}</span>
-            </div>
+          <div className="color-control">
+            <div 
+              className="color-control__full-sample"
+              style={{ backgroundColor: '#FFFFFF', border: '1px solid #ccc' }}
+              title="白:100%の色"
+            />
+            <span className="color-control__label">W</span>
+            {isMobile && (
+              <button
+                className="color-control__button"
+                onTouchStart={(e) => {
+                  e.preventDefault();
+                  whiteHandlers.handleLongPressStart(-1);
+                }}
+                onTouchEnd={(e) => {
+                  e.preventDefault();
+                  whiteHandlers.handleLongPressEnd();
+                }}
+                onTouchCancel={(e) => {
+                  e.preventDefault();
+                  whiteHandlers.handleLongPressEnd();
+                }}
+                disabled={adjustments.white <= 0}
+                title="1%減らす（長押しで連続）"
+              >
+                ◀
+              </button>
+            )}
+            <input
+              type="number"
+              min="0"
+              max="100"
+              value={adjustments.white}
+              onChange={(e) => handleAdjustmentChange('white', parseInt(e.target.value) || 0)}
+              className="color-control__input"
+            />
+            {isMobile && (
+              <button
+                className="color-control__button"
+                onTouchStart={(e) => {
+                  e.preventDefault();
+                  whiteHandlers.handleLongPressStart(1);
+                }}
+                onTouchEnd={(e) => {
+                  e.preventDefault();
+                  whiteHandlers.handleLongPressEnd();
+                }}
+                onTouchCancel={(e) => {
+                  e.preventDefault();
+                  whiteHandlers.handleLongPressEnd();
+                }}
+                disabled={adjustments.white >= 100}
+                title="1%増やす（長押しで連続）"
+              >
+                ▶
+              </button>
+            )}
+            <div 
+              className="color-control__current-sample"
+              style={{ backgroundColor: '#FFFFFF', border: '1px solid #ccc' }}
+              title={`白:${adjustments.white}%の色`}
+            />
           </div>
         </div>
+      </div>
 
-        {/* 右列：目的色（上）+ 結果色（下） */}
-        <div className="paint-mixing-controller__right-column">
-          <div className="color-display color-display--top">
-            <h4>目的色</h4>
-            <div 
-              className="color-swatch color-swatch--large"
-              style={{ backgroundColor: colorToCss(targetColor) }}
-              title={`RGB(${targetColor.r}, ${targetColor.g}, ${targetColor.b})`}
-            />
-          </div>
-          
-          <div className="color-display color-display--bottom">
-            <h4>結果色</h4>
-            <div 
-              className="color-swatch color-swatch--large"
-              style={{ backgroundColor: colorToCss(resultColor) }}
-              title={`RGB(${resultColor.r}, ${resultColor.g}, ${resultColor.b})`}
-            />
-          </div>
+      {/* 右列：目的色（上）+ 結果色（下） */}
+      <div className="paint-mixing-controller__right-column">
+        <div className="color-display color-display--top">
+          <h4>目的色</h4>
+          <div 
+            className="color-swatch color-swatch--large"
+            style={{ backgroundColor: colorToCss(targetColor) }}
+            title={`RGB(${targetColor.r}, ${targetColor.g}, ${targetColor.b})`}
+          />
+        </div>
+        
+        <div className="color-display color-display--bottom">
+          <h4>結果色</h4>
+          <div 
+            className="color-swatch color-swatch--large"
+            style={{ backgroundColor: colorToCss(resultColor) }}
+            title={`RGB(${resultColor.r}, ${resultColor.g}, ${resultColor.b})`}
+          />
         </div>
       </div>
 
