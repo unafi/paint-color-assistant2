@@ -138,6 +138,12 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  
+  /* テキスト選択防止 */
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 .color-control__button:hover:not(:disabled) {
