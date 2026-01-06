@@ -231,23 +231,31 @@ return (
 );
 ```
 
-#### 🎨 PaintMixingController コンポーネントの流用方法
+#### 🎨 PaintMixingController コンポーネントの流用方法（v2.1更新）
 
-**再利用可能性**: ★★★☆☆（70%）- 塗料混合特化
+**再利用可能性**: ★★★★☆（80%）- 塗料混合特化 + モバイルUX改善
 
 **必要ファイル**:
 ```
 src/components/PaintMixingController/
-├── PaintMixingController.tsx    # メインコンポーネント
-├── PaintMixingController.css    # スタイル定義
+├── PaintMixingController.tsx    # メインコンポーネント（◀▶ボタン対応）
+├── PaintMixingController.css    # スタイル定義（モバイル最適化）
 src/types/color.ts              # 色型定義
 src/types/paintMixing.ts        # 塗料混合型定義
 src/utils/colorUtils.ts         # 色変換ユーティリティ
 src/utils/paintMixing.ts        # 塗料混合計算
+src/hooks/useResponsiveLayout.ts # レスポンシブフック（◀▶ボタン表示制御）
+src/hooks/useLongPress.ts       # 長押しフック（◀▶ボタン機能）
 ```
 
+**v2.1の新機能**:
+- **◀▶ボタン**: モバイル表示時のみ表示される直感的な操作ボタン
+- **長押し機能**: 連続調整による効率的な塗料調整
+- **タッチ最適化**: 44px×44px以上のタッチ領域確保
+- **UI一貫性**: ColorControllerと統一されたデザイン
+
 **流用手順**:
-1. **ファイルコピー**: 上記6ファイルを新プロジェクトにコピー
+1. **ファイルコピー**: 上記8ファイルを新プロジェクトにコピー
 2. **依存関係確認**: React 18+ TypeScript 4.5+
 3. **プロパティ設定**: 4つの色を外部から制御
    ```typescript
@@ -260,20 +268,22 @@ src/utils/paintMixing.ts        # 塗料混合計算
    ```
 
 4. **カスタマイズポイント**:
-   - **計算ロジック変更**: `UnifiedPaintMixer`クラスの`calculateMixing`メソッド
-   - **表示項目変更**: CMYK成分の表示・非表示切り替え
+   - **◀▶ボタン制御**: `useResponsiveLayout`でモバイル判定
+   - **長押し設定**: `useLongPress`の増減量・間隔調整
    - **レイアウト調整**: CSS Grid/Flexboxレイアウトの変更
-   - **色インジケーター**: 各塗料の色表示カスタマイズ
+   - **タッチ領域**: ボタンサイズのカスタマイズ
 
-**制約事項**:
+**v2.1の制約事項**:
 - **固定レイアウト**: 4箇所の色配置（出発色・目標色・算出色・結果色）
 - **CMYK特化**: RGB調整機能なし
 - **塗料混合専用**: 汎用的な色調整には不向き
+- **モバイル依存**: ◀▶ボタンはモバイル表示でのみ利用可能
 
-**使用例**:
+**使用例（v2.1対応）**:
 ```typescript
-// 塗料混合シミュレーション
+// 塗料混合シミュレーション（◀▶ボタン対応）
 const [mixingResult, setMixingResult] = useState<ColorModel>();
+const { isMobile } = useResponsiveLayout(); // モバイル判定
 
 // 必要な塗料調整から算出色を計算
 const calculatedColor = useMemo(() => {
@@ -281,12 +291,17 @@ const calculatedColor = useMemo(() => {
 }, [baseColor, targetColor]);
 
 return (
-  <PaintMixingController
-    baseColor={baseColor}
-    targetColor={targetColor}
-    calculatedColor={calculatedColor}
-    onChange={setMixingResult}
-  />
+  <div className="paint-mixing-section">
+    <PaintMixingController
+      baseColor={baseColor}
+      targetColor={targetColor}
+      calculatedColor={calculatedColor}
+      onChange={setMixingResult}
+    />
+    {isMobile && (
+      <p className="mobile-hint">◀▶ボタンで直感的に調整できます</p>
+    )}
+  </div>
 );
 ```
 
@@ -699,6 +714,24 @@ UI表示更新
 **プロパティ 6: RGB⇔CMYK変換の往復一致性**
 *任意の*有効な色について、RGB→CMYK→RGB変換の結果が元の色と一致する（許容誤差内）
 **Validates: Requirements 2.1.2**
+
+### モバイルUX改善プロパティ
+
+**プロパティ 7: ◀▶ボタンの増減一貫性**
+*任意の*CMYK数値入力フィールドについて、◀ボタンで1%減少、▶ボタンで1%増加が正確に実行される
+**Validates: Requirements 7.1**
+
+**プロパティ 8: 長押し操作の連続性**
+*任意の*◀▶ボタンについて、長押し中は一定間隔で数値が連続的に増減する
+**Validates: Requirements 7.1**
+
+**プロパティ 9: 数値範囲の境界保護**
+*任意の*CMYK値について、◀▶ボタン操作後も0-100%の範囲内に収まる
+**Validates: Requirements 7.2**
+
+**プロパティ 10: モバイル表示での◀▶ボタン表示**
+*任意の*画面幅768px未満において、混色コントローラの各CMYK成分に◀▶ボタンが表示される
+**Validates: Requirements 7.1**
 
 ## テスト戦略
 
