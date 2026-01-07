@@ -1,43 +1,44 @@
+/* Figmaデザイントークンのインポート */
+@import './styles/figma-tokens.css';
+
 /* アプリケーション全体のスタイル */
 .app {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: #f9fafb;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  background-color: var(--color-bg-primary);
+  font-family: var(--font-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 /* ヘッダー */
 .app__header {
-  background-color: #ffffff;
-  border-bottom: 1px solid #e5e7eb;
-  padding: 1.5rem 2rem;
+  background-color: var(--color-bg-secondary);
+  border-bottom: 1px solid var(--color-border-light);
+  padding: var(--spacing-lg) var(--spacing-xl);
   text-align: center;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-base);
 }
 
 .app__title {
-  margin: 0 0 0.5rem 0;
-  font-size: 2rem;
-  font-weight: 700;
-  color: #1f2937;
+  margin: 0 0 var(--spacing-sm) 0;
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
 }
 
 .app__subtitle {
   margin: 0;
-  font-size: 1rem;
-  color: #6b7280;
-  font-weight: 400;
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-normal);
 }
 
 /* メインコンテンツ */
 .app__main {
   flex: 1;
-  padding: 1rem;
+  padding: var(--spacing-base);
   max-width: 100%;
   margin: 0;
   width: 100%;
@@ -47,7 +48,7 @@
 .app__desktop-layout {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1rem;
+  gap: var(--spacing-base);
   margin-bottom: 2rem;
   /* height制限を削除してコンテンツに応じた高さに */
 }
@@ -55,16 +56,17 @@
 .app__column {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  /* min-height制限を削除 */
+  gap: var(--spacing-base);
 }
 
 .app__column--left {
-  /* 左カラム用のスタイル */
+  /* 左カラム用の追加スタイル */
+  order: 1;
 }
 
 .app__column--right {
-  /* 右カラム用のスタイル */
+  /* 右カラム用の追加スタイル */
+  order: 2;
 }
 
 /* スマホ版レイアウト */
@@ -79,34 +81,34 @@
 .app__future-components {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
-  margin-top: 1rem;
+  gap: var(--spacing-lg);
+  margin-top: var(--spacing-base);
   /* フロートやposition指定を削除して通常のフローに */
 }
 
 .app__placeholder {
-  padding: 2rem;
-  border: 2px dashed #d1d5db;
-  border-radius: 0.5rem;
-  background-color: #ffffff;
+  padding: var(--spacing-xl);
+  border: 2px dashed var(--color-border-medium);
+  border-radius: var(--border-radius-md);
+  background-color: var(--color-bg-secondary);
   text-align: center;
-  color: #6b7280;
+  color: var(--color-text-secondary);
 }
 
 .app__placeholder h3 {
-  margin: 0 0 0.5rem 0;
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #374151;
+  margin: 0 0 var(--spacing-sm) 0;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-muted);
 }
 
 .app__placeholder p {
-  margin: 0 0 1rem 0;
-  font-size: 0.875rem;
+  margin: 0 0 var(--spacing-base) 0;
+  font-size: var(--font-size-sm);
 }
 
 .app__placeholder-content {
-  margin-top: 1rem;
+  margin-top: var(--spacing-base);
 }
 
 /* 色比較表示 */
@@ -114,36 +116,36 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 1rem;
+  gap: var(--spacing-base);
   flex-wrap: wrap;
 }
 
 .app__color-sample {
-  padding: 1rem 1.5rem;
-  border: 2px solid #d1d5db;
-  border-radius: 0.5rem;
-  color: #ffffff;
-  font-weight: 600;
+  padding: var(--spacing-base) var(--spacing-lg);
+  border: 2px solid var(--color-border-medium);
+  border-radius: var(--border-radius-md);
+  color: var(--color-bg-secondary);
+  font-weight: var(--font-weight-semibold);
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
   min-width: 200px;
   text-align: center;
 }
 
 .app__arrow {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #374151;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-muted);
 }
 
 /* フッター */
 .app__footer {
-  background-color: #ffffff;
-  border-top: 1px solid #e5e7eb;
-  padding: 1rem 2rem;
+  background-color: var(--color-bg-secondary);
+  border-top: 1px solid var(--color-border-light);
+  padding: var(--spacing-base) var(--spacing-xl);
   text-align: center;
-  color: #6b7280;
-  font-size: 0.875rem;
-  margin-top: 2rem;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  margin-top: var(--spacing-xl);
   /* フロートやposition指定なし、通常のフローで配置 */
 }
 
@@ -224,8 +226,8 @@
 /* 塗料混合セクション - 横並びレイアウト */
 .app__mixing-section {
   display: flex;
-  gap: 1rem;
-  margin: 1rem 0;
+  gap: var(--spacing-base);
+  margin: var(--spacing-base) 0;
   align-items: flex-start;
 }
 
@@ -243,7 +245,7 @@
 @media (max-width: 768px) {
   .app__mixing-section {
     flex-direction: column;
-    gap: 1rem;
+    gap: var(--spacing-base);
   }
   
   .app__mixing-display,
