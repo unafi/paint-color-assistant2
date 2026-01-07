@@ -125,6 +125,8 @@ App
 │   │   ├── ColorController (A)
 │   │   ├── ImageUpload (B)
 │   │   └── ColorController (B)
+│   ├── ImageSwapSection
+│   │   └── ImageSwapButton
 │   └── Mixing Section
 │       ├── ColorMixingDisplay
 │       └── PaintMixingController
@@ -142,6 +144,14 @@ interface AppState {
   // 色B（目標の色）
   originalColorB: ColorModel;    // 出発色（基準）
   resultColorB: ColorModel;      // 調整結果色
+  
+  // 画像状態（画像交換機能対応）
+  imageDataA: AppImageData | null;  // 画像Aのデータ
+  imageDataB: AppImageData | null;  // 画像Bのデータ
+  imagePathA: string;               // 画像AのPATH
+  imagePathB: string;               // 画像BのPATH
+  imageUpdateKeyA: number;          // 画像A更新キー
+  imageUpdateKeyB: number;          // 画像B更新キー
   
   // 混色結果
   mixingResultColor: ColorModel; // 混色コントローラーの結果
@@ -463,6 +473,70 @@ interface CompactMixingBarProps {
 - 色インジケーター ✅ 実装済み
 - 符号付き数値表示 ✅ 実装済み
 
+### 6. ImageSwapButton コンポーネント（実装済み）
+```typescript
+interface ImageSwapButtonProps {
+  onClick: () => void;           // クリック時のコールバック
+  disabled?: boolean;            // 無効化フラグ
+  className?: string;            // カスタムクラス名
+  'aria-label'?: string;         // アクセシビリティラベル
+}
+```
+
+**機能**:
+- 画像交換ボタンの表示 ✅ 実装済み
+- ワンクリック交換操作 ✅ 実装済み
+- レスポンシブ対応 ✅ 実装済み
+- アクセシビリティ対応 ✅ 実装済み
+- 中央配置レイアウト ✅ 実装済み
+
+**レイアウト設計**:
+```css
+.image-swap-section {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin: 0;
+  padding: 1rem 0;
+}
+
+.image-swap-button {
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+```
+
+**交換処理フロー**:
+```typescript
+const handleImageSwap = useCallback(() => {
+  // 1. 色の交換
+  const tempOriginalA = originalColorA;
+  const tempResultA = resultColorA;
+  setOriginalColorA(originalColorB);
+  setResultColorA(resultColorB);
+  setOriginalColorB(tempOriginalA);
+  setResultColorB(tempResultA);
+  
+  // 2. 画像データの交換
+  const tempImageDataA = imageDataA;
+  const tempImagePathA = imagePathA;
+  setImageDataA(imageDataB);
+  setImagePathA(imagePathB);
+  setImageDataB(tempImageDataA);
+  setImagePathB(tempImagePathA);
+  
+  // 3. 更新キーの変更（再描画トリガー）
+  setImageUpdateKeyA(prev => prev + 1);
+  setImageUpdateKeyB(prev => prev + 1);
+}, [/* 依存配列 */]);
+```
+
 ## 塗料混合計算設計（実装済み）
 
 ### 計算アルゴリズム
@@ -681,6 +755,18 @@ PaintMixingCalculator.calculateReverseMixingColor →
 UI表示更新
 ```
 
+### 画像交換フロー（新規追加）
+```
+[画像を交換]ボタンクリック → handleImageSwap → 
+色の交換（originalColorA ⇔ originalColorB, resultColorA ⇔ resultColorB） → 
+画像データの交換（imageDataA ⇔ imageDataB, imagePathA ⇔ imagePathB） → 
+更新キーの変更（imageUpdateKeyA++, imageUpdateKeyB++） → 
+ImageUploadコンポーネントの再描画 → 
+ColorControllerコンポーネントの更新 → 
+塗料混合計算の再実行 → 
+全体UI更新
+```
+
 ## 正確性プロパティ（Correctness Properties）
 
 *プロパティとは、システムのすべての有効な実行において真であるべき特性や動作のことです。これらは人間が読める仕様と機械で検証可能な正確性保証の橋渡しとなります。*
@@ -732,6 +818,20 @@ UI表示更新
 **プロパティ 10: モバイル表示での◀▶ボタン表示**
 *任意の*画面幅768px未満において、混色コントローラの各CMYK成分に◀▶ボタンが表示される
 **Validates: Requirements 7.1**
+
+### 画像交換機能プロパティ
+
+**プロパティ 11: 画像交換の完全性**
+*任意の*画像交換操作において、画像A・Bのプレビュー、色調整値、ファイルパスが完全に交換される
+**Validates: Requirements 5.2**
+
+**プロパティ 12: 画像交換後の状態同期**
+*任意の*画像交換操作後において、交換されたデータが即座に画面に反映される
+**Validates: Requirements 5.2**
+
+**プロパティ 13: 画像交換ボタンの配置一貫性**
+*任意の*デバイス環境において、画像交換ボタンが色調コントローラと塗料混合セクションの間に中央配置される
+**Validates: Requirements 5.1**
 
 ## テスト戦略
 

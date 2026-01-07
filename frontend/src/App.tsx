@@ -1,10 +1,11 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import type { ColorModel } from './types/color';
-import type { ImageData } from './types/image';
+import type { AppImageData } from './types/image';
 import { ColorController } from './components/ColorController/ColorController';
 import { ColorMixingDisplay } from './components/ColorMixingDisplay/ColorMixingDisplay';
 import { PaintMixingController } from './components/PaintMixingController/PaintMixingController';
 import { ImageUpload } from './components/ImageUpload/ImageUpload';
+import { ImageSwapButton } from './components/ImageSwapButton/ImageSwapButton';
 import { useResponsiveLayout, getDeviceStyleClass } from './hooks/useResponsiveLayout';
 import { createColorModel } from './utils/colorUtils';
 import { PaintMixingCalculator } from './utils/paintMixing';
@@ -24,6 +25,14 @@ function App() {
   const [resultColorA, setResultColorA] = useState<ColorModel>(createColorModel({ r: 128, g: 128, b: 128 }));
   const [originalColorB, setOriginalColorB] = useState<ColorModel>(createColorModel({ r: 200, g: 150, b: 100 }));
   const [resultColorB, setResultColorB] = useState<ColorModel>(createColorModel({ r: 200, g: 150, b: 100 }));
+  
+  // 画像状態管理
+  const [imageDataA, setImageDataA] = useState<AppImageData | null>(null);
+  const [imageDataB, setImageDataB] = useState<AppImageData | null>(null);
+  const [imagePathA, setImagePathA] = useState<string>('');
+  const [imagePathB, setImagePathB] = useState<string>('');
+  const [imageUpdateKeyA, setImageUpdateKeyA] = useState<number>(0);
+  const [imageUpdateKeyB, setImageUpdateKeyB] = useState<number>(0);
   
   // 混色コントローラの結果色
   const [mixingResultColor, setMixingResultColor] = useState<ColorModel>(resultColorA);
@@ -48,15 +57,19 @@ function App() {
   /**
    * 画像A選択ハンドラ
    */
-  const handleImageASelect = useCallback((image: ImageData) => {
+  const handleImageASelect = useCallback((image: AppImageData) => {
     console.log('Image A selected:', image);
+    setImageDataA(image);
+    setImagePathA(image.file.name);
   }, []);
 
   /**
    * 画像B選択ハンドラ
    */
-  const handleImageBSelect = useCallback((image: ImageData) => {
+  const handleImageBSelect = useCallback((image: AppImageData) => {
     console.log('Image B selected:', image);
+    setImageDataB(image);
+    setImagePathB(image.file.name);
   }, []);
 
   /**
@@ -105,6 +118,38 @@ function App() {
     setMixingResultColor(color);
   }, []);
 
+  /**
+   * 画像交換ハンドラ
+   * 色調コントローラAとBの色、画像データ、パスを交換する
+   */
+  const handleImageSwap = useCallback(() => {
+    console.log('🔄 画像交換実行');
+    
+    // 出発色と結果色を交換
+    const tempOriginalA = originalColorA;
+    const tempResultA = resultColorA;
+    
+    setOriginalColorA(originalColorB);
+    setResultColorA(resultColorB);
+    setOriginalColorB(tempOriginalA);
+    setResultColorB(tempResultA);
+    
+    // 画像データとパスを交換
+    const tempImageDataA = imageDataA;
+    const tempImagePathA = imagePathA;
+    
+    setImageDataA(imageDataB);
+    setImagePathA(imagePathB);
+    setImageDataB(tempImageDataA);
+    setImagePathB(tempImagePathA);
+    
+    // 更新キーを変更して再描画をトリガー
+    setImageUpdateKeyA(prev => prev + 1);
+    setImageUpdateKeyB(prev => prev + 1);
+    
+    console.log('✅ 画像交換完了 - 色、画像データ、パスを交換しました');
+  }, [originalColorA, resultColorA, originalColorB, resultColorB, imageDataA, imageDataB, imagePathA, imagePathB]);
+
   return (
     <div className={`app ${getDeviceStyleClass(deviceType)}`}>
       <header className="app__header">
@@ -142,6 +187,9 @@ function App() {
                   onColorSelect={handleColorASelect}
                   deviceType={deviceType}
                   label="画像A（現在の色）"
+                  externalImageData={imageDataA}
+                  externalPath={imagePathA}
+                  externalUpdateKey={imageUpdateKeyA}
                 />
               </div>
               
@@ -164,6 +212,9 @@ function App() {
                   onColorSelect={handleColorBSelect}
                   deviceType={deviceType}
                   label="画像B（目標の色）"
+                  externalImageData={imageDataB}
+                  externalPath={imagePathB}
+                  externalUpdateKey={imageUpdateKeyB}
                 />
               </div>
               
@@ -188,6 +239,9 @@ function App() {
                 onColorSelect={handleColorASelect}
                 deviceType={deviceType}
                 label="画像A（現在の色）"
+                externalImageData={imageDataA}
+                externalPath={imagePathA}
+                externalUpdateKey={imageUpdateKeyA}
               />
             </div>
             
@@ -208,6 +262,9 @@ function App() {
                 onColorSelect={handleColorBSelect}
                 deviceType={deviceType}
                 label="画像B（目標の色）"
+                externalImageData={imageDataB}
+                externalPath={imagePathB}
+                externalUpdateKey={imageUpdateKeyB}
               />
             </div>
             
@@ -222,6 +279,11 @@ function App() {
             </div>
           </div>
         )}
+
+        {/* 画像交換ボタンセクション */}
+        <div className="app__image-swap-section">
+          <ImageSwapButton onClick={handleImageSwap} />
+        </div>
 
         {/* 塗料混合表示と混色コントローラを横並び配置 */}
         <div className="app__mixing-section">

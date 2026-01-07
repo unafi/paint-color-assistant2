@@ -12,6 +12,7 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
+    "test:automated": "vitest run --reporter=verbose --no-watch",
     "test:e2e": "vitest run src/test/e2e/browser-puppeteer.test.ts",
     "test:browser": "npm run test:e2e",
     "deploy": "npm run build && gh-pages -d dist",

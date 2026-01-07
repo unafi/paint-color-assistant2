@@ -241,6 +241,13 @@
   min-width: 0; /* flexアイテムの縮小を許可 */
 }
 
+/* 画像交換セクション */
+.app__image-swap-section {
+  width: 100%;
+  margin: 0; /* 上下余白は0 */
+  padding: 0; /* パディングも0 */
+}
+
 /* モバイル版では縦積みに変更 */
 @media (max-width: 768px) {
   .app__mixing-section {

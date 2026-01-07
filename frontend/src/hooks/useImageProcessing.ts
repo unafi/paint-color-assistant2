@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
 import * as React from 'react';
-import type { ImageData, ImageCoordinate } from '../types/image';
+import type { AppImageData, ImageCoordinate } from '../types/image';
 import type { ColorModel } from '../types/color';
 import { ImageProcessor } from '../utils/imageUtils';
 
@@ -9,7 +9,7 @@ import { ImageProcessor } from '../utils/imageUtils';
  */
 export interface UseImageProcessingReturn {
   /** 選択された画像データ */
-  imageData: ImageData | null;
+  imageData: AppImageData | null;
   /** 選択された座標 */
   selectedCoordinate: ImageCoordinate | null;
   /** 読み込み中フラグ */
@@ -17,7 +17,7 @@ export interface UseImageProcessingReturn {
   /** エラーメッセージ */
   error: string | null;
   /** ファイル選択処理 */
-  handleFileSelect: (file: File) => Promise<void>;
+  handleFileSelect: (file: File, isExternalUpdate?: boolean) => Promise<void>;
   /** 座標クリック処理 */
   handleCoordinateClick: (coordinate: ImageCoordinate) => ColorModel | null;
   /** Canvas参照 */
@@ -33,7 +33,7 @@ export interface UseImageProcessingReturn {
  */
 export interface UseImageProcessingOptions {
   /** 画像選択時のコールバック */
-  onImageSelect?: (imageData: ImageData) => void;
+  onImageSelect?: (imageData: AppImageData) => void;
   /** 色選択時のコールバック */
   onColorSelect?: (color: ColorModel) => void;
 }
@@ -43,16 +43,22 @@ export interface UseImageProcessingOptions {
  * 画像の読み込み、表示、色抽出機能を提供
  */
 export function useImageProcessing(options?: UseImageProcessingOptions): UseImageProcessingReturn {
-  const [imageData, setImageData] = useState<ImageData | null>(null);
+  const [imageData, setImageData] = useState<AppImageData | null>(null);
   const [selectedCoordinate, setSelectedCoordinate] = useState<ImageCoordinate | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
+  // optionsを安定化
+  const stableOptions = React.useRef(options);
+  React.useEffect(() => {
+    stableOptions.current = options;
+  }, [options]);
+
   /**
    * ファイル選択処理
    */
-  const handleFileSelect = useCallback(async (file: File): Promise<void> => {
+  const handleFileSelect = useCallback(async (file: File, isExternalUpdate = false): Promise<void> => {
     setIsLoading(true);
     setError(null);
 
@@ -63,19 +69,22 @@ export function useImageProcessing(options?: UseImageProcessingOptions): UseImag
         throw new Error(validation.error);
       }
 
-      // 既存の画像URLをクリーンアップ
-      if (imageData) {
-        ImageProcessor.cleanupImageUrl(imageData);
-      }
+      // 既存の画像URLをクリーンアップ（現在の状態を直接参照）
+      setImageData(prevImageData => {
+        if (prevImageData) {
+          ImageProcessor.cleanupImageUrl(prevImageData);
+        }
+        return prevImageData;
+      });
 
       // 新しい画像データを作成
       const newImageData = await ImageProcessor.createImageData(file);
       setImageData(newImageData);
       setSelectedCoordinate(null); // 座標をリセット
 
-      // 画像選択コールバックを呼び出し
-      if (options?.onImageSelect) {
-        options.onImageSelect(newImageData);
+      // 外部更新でない場合のみ画像選択コールバックを呼び出し
+      if (!isExternalUpdate && stableOptions.current?.onImageSelect) {
+        stableOptions.current.onImageSelect(newImageData);
       }
 
       console.log('✅ 画像データ設定完了、Canvas描画は useEffect で実行されます');
@@ -87,7 +96,7 @@ export function useImageProcessing(options?: UseImageProcessingOptions): UseImag
     } finally {
       setIsLoading(false);
     }
-  }, [imageData, options]);
+  }, []);
 
   /**
    * Canvas描画用のuseEffect
@@ -132,8 +141,8 @@ export function useImageProcessing(options?: UseImageProcessingOptions): UseImag
   const handleCoordinateClick = useCallback((coordinate: ImageCoordinate): ColorModel | null => {
     console.log('🖱️ 座標クリック:', coordinate);
     
-    if (!canvasRef.current || !imageData) {
-      console.error('❌ Canvas または画像データが存在しません');
+    if (!canvasRef.current) {
+      console.error('❌ Canvas が存在しません');
       setError('画像が読み込まれていません');
       return null;
     }
@@ -148,9 +157,9 @@ export function useImageProcessing(options?: UseImageProcessingOptions): UseImag
       setError(null);
       
       // 色選択コールバックを呼び出し
-      if (options?.onColorSelect) {
+      if (stableOptions.current?.onColorSelect) {
         console.log('📞 onColorSelectコールバック呼び出し');
-        options.onColorSelect(color);
+        stableOptions.current.onColorSelect(color);
       } else {
         console.warn('⚠️ onColorSelectコールバックが設定されていません');
       }
@@ -163,19 +172,21 @@ export function useImageProcessing(options?: UseImageProcessingOptions): UseImag
       setError(errorMessage);
       return null;
     }
-  }, [imageData, options]);
+  }, []);
 
   /**
    * 画像データのクリア
    */
   const clearImage = useCallback(() => {
-    if (imageData) {
-      ImageProcessor.cleanupImageUrl(imageData);
-    }
-    setImageData(null);
+    setImageData(prevImageData => {
+      if (prevImageData) {
+        ImageProcessor.cleanupImageUrl(prevImageData);
+      }
+      return null;
+    });
     setSelectedCoordinate(null);
     setError(null);
-  }, [imageData]);
+  }, []);
 
   /**
    * エラーのクリア

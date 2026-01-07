@@ -1,0 +1,80 @@
+/* 画像交換ボタンコンテナ */
+.image-swap-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0; /* 上下余白は0 */
+  margin: 0;
+}
+
+/* 画像交換ボタン */
+.image-swap-button {
+  /* ボタンの基本スタイル */
+  background-color: #0369a1;
+  color: #ffffff;
+  border: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.25rem;
+  
+  /* サイズ - コンテンツ幅に合わせる */
+  padding: 0.5rem 1rem;
+  min-width: auto;
+  width: auto;
+  
+  /* トランジション */
+  transition: all 0.2s ease-in-out;
+  
+  /* フォーカス・ホバー状態 */
+  &:hover:not(:disabled) {
+    background-color: #0284c7;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+  
+  &:active:not(:disabled) {
+    background-color: #0c4a6e;
+    transform: translateY(0);
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  }
+  
+  &:focus {
+    outline: 2px solid #0369a1;
+    outline-offset: 2px;
+  }
+  
+  /* 無効化状態 */
+  &:disabled {
+    background-color: #9ca3af;
+    color: #d1d5db;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 767px) {
+  .image-swap-button {
+    font-size: 0.875rem;
+    padding: 0.5rem 1rem;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .image-swap-button {
+    font-size: 0.875rem;
+    padding: 0.5rem 1.25rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .image-swap-button {
+    font-size: 1rem;
+    padding: 0.625rem 1.5rem;
+  }
+}

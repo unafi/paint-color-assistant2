@@ -8,7 +8,7 @@ export type DeviceType = 'desktop' | 'tablet' | 'mobile';
 /**
  * 画像データの型定義
  */
-export interface ImageData {
+export interface AppImageData {
   /** ファイルオブジェクト */
   file: File;
   /** 画像URL（プレビュー用） */
@@ -36,13 +36,19 @@ export interface ImageCoordinate {
  */
 export interface ImageUploadProps {
   /** 画像選択時のコールバック */
-  onImageSelect: (image: ImageData) => void;
+  onImageSelect: (image: AppImageData) => void;
   /** 色選択時のコールバック */
   onColorSelect: (color: ColorModel) => void;
   /** デバイスタイプ */
   deviceType: DeviceType;
   /** ラベル */
   label: string;
+  /** 外部から設定する画像データ（画像交換用） */
+  externalImageData?: AppImageData | null;
+  /** 外部から設定するパス（画像交換用） */
+  externalPath?: string;
+  /** 外部設定の更新キー（再描画トリガー用） */
+  externalUpdateKey?: number;
 }
 
 /**
@@ -50,7 +56,7 @@ export interface ImageUploadProps {
  */
 export interface ImagePreviewProps {
   /** 画像データ */
-  imageData: ImageData | null;
+  imageData: AppImageData | null;
   /** 色選択時のコールバック */
   onColorSelect: (color: ColorModel) => void;
   /** デバイスタイプ */

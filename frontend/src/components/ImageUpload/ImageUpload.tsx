@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState, useEffect } from 'react';
 import type { ImageUploadProps } from '../../types/image';
 import { useImageProcessing } from '../../hooks/useImageProcessing';
 import { getFileInputType } from '../../hooks/useResponsiveLayout';
@@ -15,7 +15,10 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
   onImageSelect,
   onColorSelect,
   deviceType,
-  label
+  label,
+  externalImageData,
+  externalPath,
+  externalUpdateKey
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [pathInput, setPathInput] = useState<string>('');
@@ -35,6 +38,22 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
   });
 
   const fileInputType = getFileInputType(deviceType);
+
+  // 外部から設定された画像データを反映
+  useEffect(() => {
+    if (externalUpdateKey !== undefined && externalImageData) {
+      console.log('🔄 外部画像データを反映:', externalImageData.file.name);
+      handleFileSelect(externalImageData.file, true); // 外部更新フラグを追加
+    }
+  }, [externalUpdateKey, externalImageData]); // handleFileSelectを依存配列から削除
+
+  // 外部から設定されたパスを反映
+  useEffect(() => {
+    if (externalPath !== undefined) {
+      console.log('🔄 外部パスを反映:', externalPath);
+      setPathInput(externalPath);
+    }
+  }, [externalPath]);
 
   /**
    * PATH入力変更ハンドラ
