@@ -38,9 +38,9 @@ export function useLongPress<T>({
   longPressDelay = 500,
   intervalDelay = 50
 }: UseLongPressOptions<T>): UseLongPressReturn {
-  // 長押し用のref
-  const longPressTimerRef = useRef<number | null>(null);
-  const longPressIntervalRef = useRef<number | null>(null);
+  // 長押し用のref（NodeJS.Timeout型を使用）
+  const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const longPressIntervalRef = useRef<NodeJS.Timeout | null>(null);
   
   // 現在の値を追跡するref（状態更新の非同期問題を解決）
   const currentValueRef = useRef<T>(currentValue);
@@ -96,8 +96,8 @@ export function useLongPress<T>({
     handleValueAdjust(delta);
 
     // 長押し判定のためのタイマー（指定時間後に連続実行開始）
-    longPressTimerRef.current = window.setTimeout(() => {
-      longPressIntervalRef.current = window.setInterval(() => {
+    longPressTimerRef.current = setTimeout(() => {
+      longPressIntervalRef.current = setInterval(() => {
         handleValueAdjust(delta);
       }, intervalDelay);
     }, longPressDelay);

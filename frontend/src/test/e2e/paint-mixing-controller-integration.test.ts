@@ -9,7 +9,7 @@ import puppeteer, { Browser, Page } from 'puppeteer';
 describe('PaintMixingController E2E Integration Tests', () => {
   let browser: Browser;
   let page: Page;
-  const baseUrl = 'http://localhost:5173';
+  const baseUrl = 'http://localhost:5174/paint-color-assistant2/';
 
   beforeAll(async () => {
     browser = await puppeteer.launch({
@@ -21,7 +21,7 @@ describe('PaintMixingController E2E Integration Tests', () => {
       ]
     });
     page = await browser.newPage();
-  }, 30000);
+  }, 60000); // 60秒に延長
 
   afterAll(async () => {
     if (browser) {
@@ -117,14 +117,14 @@ describe('PaintMixingController E2E Integration Tests', () => {
 
       // ▶ボタンをタップして値が増加することを確認
       await cyanRightButton!.tap();
-      await page.waitForTimeout(100); // 値の更新を待つ
+      await new Promise(resolve => setTimeout(resolve, 100)); // 値の更新を待つ
       
       let newValue = await cyanInput!.evaluate((el: HTMLInputElement) => parseInt(el.value));
       expect(newValue).toBe(initialValue + 1);
 
       // ◀ボタンをタップして値が減少することを確認
       await cyanLeftButton!.tap();
-      await page.waitForTimeout(100);
+      await new Promise(resolve => setTimeout(resolve, 100));
       
       newValue = await cyanInput!.evaluate((el: HTMLInputElement) => parseInt(el.value));
       expect(newValue).toBe(initialValue);
@@ -146,7 +146,7 @@ describe('PaintMixingController E2E Integration Tests', () => {
         el.value = '0';
         el.dispatchEvent(new Event('change', { bubbles: true }));
       });
-      await page.waitForTimeout(100);
+      await new Promise(resolve => setTimeout(resolve, 100));
 
       // ◀ボタンが無効化されていることを確認
       const isDisabled = await cyanLeftButton!.evaluate((el: HTMLButtonElement) => el.disabled);
@@ -157,7 +157,7 @@ describe('PaintMixingController E2E Integration Tests', () => {
         el.value = '100';
         el.dispatchEvent(new Event('change', { bubbles: true }));
       });
-      await page.waitForTimeout(100);
+      await new Promise(resolve => setTimeout(resolve, 100));
 
       // ▶ボタンが無効化されていることを確認
       const cyanRightButton = await cyanRow!.$('.color-control__button:last-of-type');
@@ -180,7 +180,7 @@ describe('PaintMixingController E2E Integration Tests', () => {
 
       // スマホサイズに変更
       await page.setViewport({ width: 375, height: 667 });
-      await page.waitForTimeout(500); // リサイズの反映を待つ
+      await new Promise(resolve => setTimeout(resolve, 500)); // リサイズの反映を待つ
 
       // ◀▶ボタンが表示されることを確認
       buttons = await page.$$('.paint-mixing-controller .color-control__button');
@@ -188,7 +188,7 @@ describe('PaintMixingController E2E Integration Tests', () => {
 
       // デスクトップサイズに戻す
       await page.setViewport({ width: 1200, height: 800 });
-      await page.waitForTimeout(500);
+      await new Promise(resolve => setTimeout(resolve, 500));
 
       // ◀▶ボタンが再び非表示になることを確認
       buttons = await page.$$('.paint-mixing-controller .color-control__button');
@@ -210,7 +210,7 @@ describe('PaintMixingController E2E Integration Tests', () => {
       // ◀▶ボタンで値を変更
       const cyanRightButton = await page.$('.adjustment-row:first-child .color-control__button:last-of-type');
       await cyanRightButton!.tap();
-      await page.waitForTimeout(200);
+      await new Promise(resolve => setTimeout(resolve, 200));
 
       // 結果色が変化したことを確認
       const newResultColor = await page.$eval('.color-display--bottom .color-swatch', 
@@ -238,11 +238,11 @@ describe('PaintMixingController E2E Integration Tests', () => {
 
       // 各ボタンをタップ
       await cyanRightButton!.tap();
-      await page.waitForTimeout(100);
+      await new Promise(resolve => setTimeout(resolve, 100));
       await magentaRightButton!.tap();
-      await page.waitForTimeout(100);
+      await new Promise(resolve => setTimeout(resolve, 100));
       await yellowRightButton!.tap();
-      await page.waitForTimeout(100);
+      await new Promise(resolve => setTimeout(resolve, 100));
 
       // 各成分の値が正しく更新されていることを確認
       const cyanValue = await page.$eval('.adjustment-row:nth-child(1) .adjustment-input', 

@@ -93,7 +93,7 @@ describe('ColorController iPhone Bug Analysis', () => {
     await decreaseButton.asElement()?.tap();
     
     // 少し待機
-    await page.waitForTimeout(100);
+    await new Promise(resolve => setTimeout(resolve, 100));
 
     // 値が1減少したことを確認
     const newValue = await page.evaluate(el => parseInt(el.value), input);
@@ -121,13 +121,13 @@ describe('ColorController iPhone Bug Analysis', () => {
     await buttonElement?.touchstart();
     
     // 1秒間長押し
-    await page.waitForTimeout(1000);
+    await new Promise(resolve => setTimeout(resolve, 1000));
     
     // 長押し終了（touchend）
     await buttonElement?.touchend();
 
     // 少し待機
-    await page.waitForTimeout(200);
+    await new Promise(resolve => setTimeout(resolve, 200));
 
     // 値が連続的に減少したことを確認
     const newValue = await page.evaluate(el => parseInt(el.value), input);

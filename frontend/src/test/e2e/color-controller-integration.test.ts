@@ -9,7 +9,7 @@ import path from 'path';
 describe('🎨 色調コントローラー統合テスト', () => {
   let browser: Browser;
   let page: Page;
-  const APP_URL = 'http://localhost:5173';
+  const APP_URL = 'http://localhost:5174/paint-color-assistant2/';
   const TEST_IMAGE_PATH = path.resolve(__dirname, '../../../test_red.png');
 
   beforeAll(async () => {
@@ -48,7 +48,7 @@ describe('🎨 色調コントローラー統合テスト', () => {
     });
     
     console.log('✅ 色調コントローラー統合テスト用ブラウザ起動完了');
-  }, 30000);
+  }, 60000); // 60秒に延長
 
   afterAll(async () => {
     if (browser) {

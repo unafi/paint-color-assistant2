@@ -79,65 +79,89 @@ export const ColorController: React.FC<ColorControllerProps> = ({
   }, [resultColor, onChange, disabled]);
 
   /**
-   * RGB個別コンポーネント用の長押しハンドラを生成
+   * RGB個別コンポーネント用の長押しハンドラ
    */
-  const createRgbLongPressHandlers = useCallback((component: 'r' | 'g' | 'b') => {
-    return useLongPress({
-      currentValue: resultColor[component],
-      onValueChange: (newValue: number) => {
-        const newRgb = {
-          r: component === 'r' ? newValue : resultColor.r,
-          g: component === 'g' ? newValue : resultColor.g,
-          b: component === 'b' ? newValue : resultColor.b
-        };
-        
-        const newCmyk = ColorSpaceConverter.rgbToCmyk(newRgb.r, newRgb.g, newRgb.b);
-        
-        const newResultColor: ColorModel = {
-          ...newRgb,
-          ...newCmyk
-        };
-        
-        onChange(newResultColor);
-      },
-      adjustValue: (currentValue: number, delta: number) => {
-        return Math.max(0, Math.min(255, currentValue + delta));
-      },
-      disabled
-    });
-  }, [resultColor, onChange, disabled]);
+  const rgbRLongPress = useLongPress({
+    currentValue: resultColor.r,
+    onValueChange: (newValue: number) => handleRgbChange('r', newValue),
+    adjustValue: (currentValue: number, delta: number) => {
+      return Math.max(0, Math.min(255, currentValue + delta));
+    },
+    disabled
+  });
+
+  const rgbGLongPress = useLongPress({
+    currentValue: resultColor.g,
+    onValueChange: (newValue: number) => handleRgbChange('g', newValue),
+    adjustValue: (currentValue: number, delta: number) => {
+      return Math.max(0, Math.min(255, currentValue + delta));
+    },
+    disabled
+  });
+
+  const rgbBLongPress = useLongPress({
+    currentValue: resultColor.b,
+    onValueChange: (newValue: number) => handleRgbChange('b', newValue),
+    adjustValue: (currentValue: number, delta: number) => {
+      return Math.max(0, Math.min(255, currentValue + delta));
+    },
+    disabled
+  });
 
   /**
-   * CMYK個別コンポーネント用の長押しハンドラを生成
+   * CMYK個別コンポーネント用の長押しハンドラ
    */
-  const createCmykLongPressHandlers = useCallback((component: 'c' | 'm' | 'y' | 'k') => {
-    return useLongPress({
-      currentValue: resultColor[component],
-      onValueChange: (newValue: number) => {
-        const newCmyk = {
-          c: component === 'c' ? newValue : resultColor.c,
-          m: component === 'm' ? newValue : resultColor.m,
-          y: component === 'y' ? newValue : resultColor.y,
-          k: component === 'k' ? newValue : resultColor.k
-        };
-        
-        const newRgb = ColorSpaceConverter.cmykToRgb(
-          newCmyk.c, newCmyk.m, newCmyk.y, newCmyk.k
-        );
-        
-        const newResultColor: ColorModel = {
-          ...newRgb,
-          ...newCmyk
-        };
-        
-        onChange(newResultColor);
-      },
-      adjustValue: (currentValue: number, delta: number) => {
-        return Math.max(0, Math.min(100, currentValue + delta));
-      },
-      disabled
-    });
-  }, [resultColor, onChange, disabled]);
+  const cmykCLongPress = useLongPress({
+    currentValue: resultColor.c,
+    onValueChange: (newValue: number) => handleCmykChange('c', newValue),
+    adjustValue: (currentValue: number, delta: number) => {
+      return Math.max(0, Math.min(100, currentValue + delta));
+    },
+    disabled
+  });
+
+  const cmykMLongPress = useLongPress({
+    currentValue: resultColor.m,
+    onValueChange: (newValue: number) => handleCmykChange('m', newValue),
+    adjustValue: (currentValue: number, delta: number) => {
+      return Math.max(0, Math.min(100, currentValue + delta));
+    },
+    disabled
+  });
+
+  const cmykYLongPress = useLongPress({
+    currentValue: resultColor.y,
+    onValueChange: (newValue: number) => handleCmykChange('y', newValue),
+    adjustValue: (currentValue: number, delta: number) => {
+      return Math.max(0, Math.min(100, currentValue + delta));
+    },
+    disabled
+  });
+
+  const cmykKLongPress = useLongPress({
+    currentValue: resultColor.k,
+    onValueChange: (newValue: number) => handleCmykChange('k', newValue),
+    adjustValue: (currentValue: number, delta: number) => {
+      return Math.max(0, Math.min(100, currentValue + delta));
+    },
+    disabled
+  });
+
+  /**
+   * 長押しハンドラのマップ
+   */
+  const rgbLongPressHandlers = {
+    r: rgbRLongPress,
+    g: rgbGLongPress,
+    b: rgbBLongPress
+  };
+
+  const cmykLongPressHandlers = {
+    c: cmykCLongPress,
+    m: cmykMLongPress,
+    y: cmykYLongPress,
+    k: cmykKLongPress
+  };
 
   return (
     <div className={`color-controller ${disabled ? 'disabled' : ''}`}>
@@ -160,7 +184,7 @@ export const ColorController: React.FC<ColorControllerProps> = ({
           <h4 className="color-controller__section-title">RGB調整</h4>
           <div className="color-controls">
             {(['r', 'g', 'b'] as const).map((component) => {
-              const longPressHandlers = createRgbLongPressHandlers(component);
+              const longPressHandlers = rgbLongPressHandlers[component];
               
               return (
                 <div key={component} className="color-control">
@@ -251,7 +275,7 @@ export const ColorController: React.FC<ColorControllerProps> = ({
           <h4 className="color-controller__section-title">CMYK調整</h4>
           <div className="color-controls">
             {(['c', 'm', 'y', 'k'] as const).map((component) => {
-              const longPressHandlers = createCmykLongPressHandlers(component);
+              const longPressHandlers = cmykLongPressHandlers[component];
               
               return (
                 <div key={component} className="color-control">
