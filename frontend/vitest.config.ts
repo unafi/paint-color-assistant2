@@ -7,7 +7,16 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
     globals: true,
-    testTimeout: 30000, // 30秒
-    hookTimeout: 30000, // 30秒
+    watch: false,        // デフォルトでwatch無効
+    reporter: ['verbose', 'json'],
+    testTimeout: 30000,  // 30秒
+    hookTimeout: 30000,  // 30秒
+    
+    // CI環境での設定
+    ...(process.env.CI && {
+      minThreads: 1,
+      maxThreads: 2,
+      reporter: ['verbose', 'github-actions']
+    })
   },
 });

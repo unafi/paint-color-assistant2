@@ -2,6 +2,7 @@ import { useState, useCallback, useRef } from 'react';
 import * as React from 'react';
 import type { AppImageData, ImageCoordinate } from '../types/image';
 import type { ColorModel } from '../types/color';
+import { debugLog } from '../utils/logger';
 import { ImageProcessor } from '../utils/imageUtils';
 
 /**
@@ -87,7 +88,7 @@ export function useImageProcessing(options?: UseImageProcessingOptions): UseImag
         stableOptions.current.onImageSelect(newImageData);
       }
 
-      console.log('✅ 画像データ設定完了、Canvas描画は useEffect で実行されます');
+      debugLog('✅ 画像データ設定完了、Canvas描画は useEffect で実行されます');
 
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : '画像の読み込みに失敗しました';
@@ -104,19 +105,19 @@ export function useImageProcessing(options?: UseImageProcessingOptions): UseImag
    */
   const drawImageToCanvas = useCallback(() => {
     if (!imageData || !canvasRef.current) {
-      console.log('🔍 Canvas描画スキップ:', {
+      debugLog('🔍 Canvas描画スキップ:', {
         hasImageData: !!imageData,
         hasCanvasRef: !!canvasRef.current
       });
       return;
     }
 
-    console.log('🎯 Canvas描画実行開始');
+    debugLog('🎯 Canvas描画実行開始');
     
     try {
       // コンテナ幅を取得（50%想定で400px程度）
       const containerWidth = canvasRef.current.parentElement?.clientWidth || 400;
-      console.log('📏 コンテナ幅:', containerWidth);
+      debugLog('📏 コンテナ幅:', containerWidth);
       
       ImageProcessor.drawImageToCanvas(canvasRef.current, imageData, containerWidth);
     } catch (error) {
@@ -128,7 +129,7 @@ export function useImageProcessing(options?: UseImageProcessingOptions): UseImag
   // imageDataが変更されたときにCanvas描画を実行
   React.useEffect(() => {
     if (imageData) {
-      console.log('🔄 imageData更新検出、Canvas描画を実行');
+      debugLog('🔄 imageData更新検出、Canvas描画を実行');
       // 少し遅延してCanvas描画（DOM更新を確実に待つ）
       const timeoutId = setTimeout(drawImageToCanvas, 150);
       return () => clearTimeout(timeoutId);
@@ -139,7 +140,7 @@ export function useImageProcessing(options?: UseImageProcessingOptions): UseImag
    * 座標クリック処理
    */
   const handleCoordinateClick = useCallback((coordinate: ImageCoordinate): ColorModel | null => {
-    console.log('🖱️ 座標クリック:', coordinate);
+    debugLog('🖱️ 座標クリック:', coordinate);
     
     if (!canvasRef.current) {
       console.error('❌ Canvas が存在しません');
@@ -149,16 +150,16 @@ export function useImageProcessing(options?: UseImageProcessingOptions): UseImag
 
     try {
       // 座標から色を抽出
-      console.log('🎨 色抽出開始...');
+      debugLog('🎨 色抽出開始...');
       const color = ImageProcessor.extractColorFromCanvas(canvasRef.current, coordinate);
-      console.log('✅ 抽出された色:', color);
+      debugLog('✅ 抽出された色:', color);
       
       setSelectedCoordinate(coordinate);
       setError(null);
       
       // 色選択コールバックを呼び出し
       if (stableOptions.current?.onColorSelect) {
-        console.log('📞 onColorSelectコールバック呼び出し');
+        debugLog('📞 onColorSelectコールバック呼び出し');
         stableOptions.current.onColorSelect(color);
       } else {
         console.warn('⚠️ onColorSelectコールバックが設定されていません');

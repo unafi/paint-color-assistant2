@@ -2,6 +2,8 @@
  * モバイル環境での拡張機能
  */
 
+import { debugLog } from './logger';
+
 /**
  * モバイル環境かどうかを判定
  */
@@ -29,7 +31,7 @@ export async function checkCameraAccess(): Promise<boolean> {
     stream.getTracks().forEach(track => track.stop());
     return true;
   } catch (error) {
-    console.log('カメラアクセス不可:', error);
+    debugLog('カメラアクセス不可:', error);
     return false;
   }
 }
@@ -77,7 +79,7 @@ export async function convertHEICToJPEG(file: File): Promise<File> {
   // 必要に応じてheic2anyライブラリ等を使用
   
   if (file.type === 'image/heic' || file.type === 'image/heif') {
-    console.log('HEIC/HEIF形式が検出されました。変換処理を実行します。');
+    debugLog('HEIC/HEIF形式が検出されました。変換処理を実行します。');
     
     // 実際の変換処理はheic2anyライブラリを使用
     // npm install heic2any
@@ -96,7 +98,7 @@ export async function convertHEICToJPEG(file: File): Promise<File> {
       // );
       
       // 暫定的に元ファイルを返す
-      console.log('HEIC変換ライブラリが未実装のため、元ファイルを使用します');
+      debugLog('HEIC変換ライブラリが未実装のため、元ファイルを使用します');
       return file;
     } catch (error) {
       console.error('HEIC変換エラー:', error);

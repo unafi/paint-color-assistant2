@@ -22,9 +22,9 @@
 
 **技術構成:**
 - Frontend: React + TypeScript + Vite
-- Backend: Node.js + Express + TypeScript
-- 色変換: Chroma.js
+- 色変換: Canvas API + 独自実装
 - スタイリング: Tailwind CSS
+- デプロイ: GitHub Pages (静的サイト)
 
 **メリット:**
 - ✅ クライアント側完結の色調整
@@ -46,8 +46,8 @@
 
 **技術構成:**
 - Frontend: React + TypeScript
-- Backend: Python (FastAPI/Flask) + Node.js API Gateway
-- 通信: REST API
+- 色変換: Canvas API + 独自実装
+- 通信: 不要（クライアント完結）
 
 **メリット:**
 - ✅ フロントエンドの利点を活用
@@ -66,7 +66,7 @@
 ### 3. Flask + Jinja2 + JavaScript ⭐⭐⭐
 
 **技術構成:**
-- Backend: Flask + Python
+- Framework: Flask + Python
 - Frontend: Jinja2 + Vanilla JavaScript
 - 色変換: JavaScript ライブラリ
 
@@ -105,19 +105,21 @@
 **保守性:** 高
 **拡張性:** 高
 
-## 最終推奨: Node.js + React
+## 最終推奨: React + TypeScript (クライアント完結型)
 
 ### 選定理由
 
 1. **要件適合性**
-   - クライアント側完結の色調整が完全に実現可能
+   - クライアント側完結の色調整が完全に実現
    - リアルタイムな色変換とプレビュー
    - レスポンシブデザインの容易な実装
+   - サーバー不要でコスト削減
 
 2. **技術的優位性**
-   - Chroma.jsなど豊富な色変換ライブラリ
+   - Canvas APIによる高速な画像処理
    - TypeScriptによる型安全性
    - モダンな開発ツールチェーン
+   - GitHub Pagesでの無料ホスティング
 
 3. **開発効率**
    - 統一された言語環境
@@ -149,8 +151,8 @@
 
 ## 次のステップ
 
-1. Node.js環境のセットアップ
+1. React + TypeScript環境のセットアップ
 2. プロジェクト構造の初期化
 3. 基本的なReactコンポーネントの作成
-4. 色変換ロジックの実装
-5. 段階的な機能追加
+4. Canvas APIによる色変換ロジックの実装
+5. GitHub Pagesへのデプロイ設定

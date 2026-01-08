@@ -1,18 +1,12 @@
 {
   "name": "paint-color-assistant2",
   "version": "1.0.0",
-  "main": "electron-example/main.js",
   "scripts": {
-    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
+    "dev": "npm run dev:frontend",
     "dev:frontend": "cd frontend && npm run dev",
-    "dev:backend": "cd backend && npm run dev",
-    "build": "npm run build:frontend && npm run build:backend",
+    "build": "npm run build:frontend",
     "build:frontend": "cd frontend && npm run build",
-    "build:backend": "cd backend && npm run build",
-    "install:all": "npm install && cd frontend && npm install && cd ../backend && npm install",
-    "electron": "electron electron-example/main.js",
-    "electron:dev": "concurrently \"npm run dev:frontend\" \"wait-on http://localhost:5173 http://localhost:5174 && NODE_ENV=development electron electron-example/main.js\"",
-    "electron:build": "npm run build:frontend && electron electron-example/main.js"
+    "install:all": "npm install && cd frontend && npm install"
   },
   "keywords": [
     "paint",
@@ -23,10 +17,5 @@
     "typescript"
   ],
   "author": "Kiro AI Assistant",
-  "license": "MIT",
-  "devDependencies": {
-    "concurrently": "^8.2.2",
-    "electron": "^39.2.7",
-    "wait-on": "^9.0.3"
-  }
+  "license": "MIT"
 }

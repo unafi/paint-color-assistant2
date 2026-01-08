@@ -1,6 +1,7 @@
 import type { ImageData, ImageCoordinate } from '../types/image';
 import type { ColorModel } from '../types/color';
 import { createColorModel } from './colorUtils';
+import { debugLog } from './logger';
 
 /**
  * 画像処理ユーティリティクラス
@@ -43,7 +44,7 @@ export class ImageProcessor {
    * @returns ColorModel
    */
   static extractColorFromCanvas(canvas: HTMLCanvasElement, coordinate: ImageCoordinate): ColorModel {
-    console.log('🎯 色抽出開始 - Canvas:', canvas.width, 'x', canvas.height, '座標:', coordinate);
+    debugLog('🎯 色抽出開始 - Canvas:', canvas.width, 'x', canvas.height, '座標:', coordinate);
     
     const ctx = canvas.getContext('2d');
     if (!ctx) {
@@ -58,7 +59,7 @@ export class ImageProcessor {
     const x = Math.floor(coordinate.x * scaleX);
     const y = Math.floor(coordinate.y * scaleY);
 
-    console.log('📐 座標変換:', {
+    debugLog('📐 座標変換:', {
       original: coordinate,
       rect: { width: rect.width, height: rect.height },
       scale: { x: scaleX, y: scaleY },
@@ -74,10 +75,10 @@ export class ImageProcessor {
     const imageData = ctx.getImageData(x, y, 1, 1);
     const [r, g, b, a] = imageData.data;
 
-    console.log('🎨 抽出されたピクセルデータ:', { r, g, b, a });
+    debugLog('🎨 抽出されたピクセルデータ:', { r, g, b, a });
 
     const color = createColorModel({ r, g, b });
-    console.log('✅ 作成されたColorModel:', color);
+    debugLog('✅ 作成されたColorModel:', color);
     
     return color;
   }
@@ -93,7 +94,7 @@ export class ImageProcessor {
     imageData: ImageData, 
     containerWidth?: number
   ): void {
-    console.log('🖼️ Canvas描画開始:', {
+    debugLog('🖼️ Canvas描画開始:', {
       canvas: canvas,
       canvasWidth: canvas.width,
       canvasHeight: canvas.height,
@@ -107,12 +108,12 @@ export class ImageProcessor {
       throw new Error('Canvas context の取得に失敗しました');
     }
 
-    console.log('✅ Canvas context 取得成功');
+    debugLog('✅ Canvas context 取得成功');
 
     const img = new Image();
     
     img.onload = () => {
-      console.log('🖼️ 画像読み込み完了:', {
+      debugLog('🖼️ 画像読み込み完了:', {
         naturalWidth: img.naturalWidth,
         naturalHeight: img.naturalHeight
       });
@@ -128,7 +129,7 @@ export class ImageProcessor {
         maxHeight
       );
 
-      console.log('📐 表示サイズ計算結果:', {
+      debugLog('📐 表示サイズ計算結果:', {
         original: { width: img.naturalWidth, height: img.naturalHeight },
         maxSize: { width: maxWidth, height: maxHeight },
         calculated: { width, height }
@@ -138,7 +139,7 @@ export class ImageProcessor {
       canvas.width = width;
       canvas.height = height;
       
-      console.log('🎯 Canvasサイズ設定完了:', {
+      debugLog('🎯 Canvasサイズ設定完了:', {
         canvasWidth: canvas.width,
         canvasHeight: canvas.height
       });
@@ -146,7 +147,7 @@ export class ImageProcessor {
       // 画像を描画
       try {
         ctx.drawImage(img, 0, 0, width, height);
-        console.log('✅ Canvas描画完了');
+        debugLog('✅ Canvas描画完了');
       } catch (error) {
         console.error('❌ Canvas描画エラー:', error);
       }
@@ -156,7 +157,7 @@ export class ImageProcessor {
       console.error('❌ 画像読み込みエラー:', error);
     };
 
-    console.log('🔄 画像読み込み開始:', imageData.url);
+    debugLog('🔄 画像読み込み開始:', imageData.url);
     img.src = imageData.url;
   }
 

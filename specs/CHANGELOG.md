@@ -212,7 +212,7 @@ const { isMobile } = useResponsiveLayout();
 ```
 Web Browser (Primary) / Electron Shell (Optional)
 ├── Frontend (React + TypeScript + Vite) ✅ 実装済み
-├── Backend (Node.js + Express) 🚧 最小構成
+├── クライアント完結型 (サーバー不要) ✅ 実装済み
 └── Native Integration (File System + Dialogs) ✅ 実装済み
 ```
 

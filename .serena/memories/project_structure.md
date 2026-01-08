@@ -6,7 +6,7 @@ paint-color-assistant2/
 ├── .git/                  # Git管理
 ├── .github/               # GitHub Actions設定
 ├── .serena/               # Serena MCP設定
-├── backend/               # Express APIサーバー
+
 ├── electron-example/      # Electron版サンプル
 ├── frontend/              # Reactアプリケーション (メイン)
 │   ├── dist/              # ビルド出力
@@ -22,7 +22,7 @@ paint-color-assistant2/
 │   │   └── utils/         # ユーティリティ関数
 │   ├── package.json       # 依存関係・スクリプト
 │   └── vite.config.ts     # Vite設定
-├── shared/                # 共通型定義
+
 ├── reference/             # 旧版参考ファイル
 ├── specs/                 # 仕様書
 └── README.md              # プロジェクト説明

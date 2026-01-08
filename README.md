@@ -1,6 +1,6 @@
 # 塗装色混合アシスタント v2.0
 
-Node.js + React構成による塗装色混合計算アプリケーション
+React + TypeScript構成による塗装色混合計算アプリケーション
 
 ## 🌐 ライブデモ
 
@@ -8,17 +8,12 @@ Node.js + React構成による塗装色混合計算アプリケーション
 
 ## 技術スタック
 
-### フロントエンド
 - **React 18**: UIフレームワーク
 - **TypeScript**: 型安全性
-- **Chroma.js**: 色変換ライブラリ
 - **Tailwind CSS**: スタイリング
 - **Vite**: ビルドツール
-
-### バックエンド
-- **Node.js**: ランタイム
-- **Express**: Webフレームワーク
-- **TypeScript**: 型安全性
+- **Canvas API**: 画像処理・色抽出
+- **GitHub Pages**: 静的サイトホスティング
 
 ## 主な機能
 
@@ -44,27 +39,21 @@ paint-color-assistant2/
 │   │   ├── hooks/         # カスタムフック
 │   │   ├── utils/         # ユーティリティ関数
 │   │   ├── types/         # TypeScript型定義
-│   │   └── services/      # API通信
+│   │   └── test/          # テストファイル
 │   ├── public/            # 静的ファイル
 │   └── package.json
-├── backend/               # Express APIサーバー
-│   ├── src/
-│   │   ├── routes/        # APIルート
-│   │   ├── services/      # ビジネスロジック
-│   │   ├── utils/         # ユーティリティ
-│   │   └── types/         # TypeScript型定義
-│   └── package.json
-├── shared/                # 共通型定義
-└── reference/             # 旧版からの参考ファイル
+├── electron-example/      # Electron版サンプル
+├── reference/             # 旧版からの参考ファイル
+└── specs/                 # 仕様書・設計ドキュメント
 ```
 
 ## 開発開始手順
 
 1. Node.js環境のセットアップ
-2. フロントエンド・バックエンドの初期化
-3. 基本的なプロジェクト構造の構築
-4. 色調整コンポーネントの実装
-5. 塗料混合ロジックの移植
+2. フロントエンドの初期化: `cd frontend && npm install`
+3. 開発サーバー起動: `npm run dev`
+4. ビルド: `npm run build`
+5. GitHub Pagesデプロイ: 自動デプロイ設定済み
 
 ## 旧版からの改善点
 

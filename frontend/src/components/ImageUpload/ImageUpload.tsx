@@ -3,8 +3,8 @@ import type { ImageUploadProps } from '../../types/image';
 import { useImageProcessing } from '../../hooks/useImageProcessing';
 import { getFileInputType } from '../../hooks/useResponsiveLayout';
 import { cleanFilePath, validateFilePath, isSupportedImageExtension } from '../../utils/pathUtils';
-import { isElectronEnvironment, showElectronFileDialog, loadElectronImageFromPath } from '../../utils/electronUtils';
-import { isMobileEnvironment, createMobileFileInput, convertHEICToJPEG } from '../../utils/mobileUtils';
+import { isMobileEnvironment, convertHEICToJPEG } from '../../utils/mobileUtils';
+import { debugLog } from '../../utils/logger';
 import './ImageUpload.css';
 
 /**
@@ -42,7 +42,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
   // 外部から設定された画像データを反映
   useEffect(() => {
     if (externalUpdateKey !== undefined && externalImageData) {
-      console.log('🔄 外部画像データを反映:', externalImageData.file.name);
+      debugLog('🔄 外部画像データを反映:', externalImageData.file.name);
       handleFileSelect(externalImageData.file, true); // 外部更新フラグを追加
     }
   }, [externalUpdateKey, externalImageData]); // handleFileSelectを依存配列から削除
@@ -50,7 +50,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
   // 外部から設定されたパスを反映
   useEffect(() => {
     if (externalPath !== undefined) {
-      console.log('🔄 外部パスを反映:', externalPath);
+      debugLog('🔄 外部パスを反映:', externalPath);
       setPathInput(externalPath);
     }
   }, [externalPath]);
@@ -60,25 +60,25 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
    */
   const handlePathInputChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const rawPath = event.target.value;
-    console.log('✏️ PATH入力変更:', rawPath);
+    debugLog('✏️ PATH入力変更:', rawPath);
     setPathInput(rawPath);
   }, []);
 
   /**
-   * PATH入力のフォーカスアウトハンドラ（Electron対応版）
+   * PATH入力のフォーカスアウトハンドラ（Web版）
    */
   const handlePathInputBlur = useCallback(async () => {
-    console.log('🔍 PATH入力フォーカスアウト:', pathInput);
+    debugLog('🔍 PATH入力フォーカスアウト:', pathInput);
     
     if (!pathInput.trim()) {
-      console.log('⚠️ PATH入力が空です');
+      debugLog('⚠️ PATH入力が空です');
       return;
     }
 
     const cleanPath = cleanFilePath(pathInput);
     const validation = validateFilePath(cleanPath);
     
-    console.log('📋 PATH検証結果:', { cleanPath, validation });
+    debugLog('📋 PATH検証結果:', { cleanPath, validation });
     
     if (!validation.isValid) {
       console.error('❌ 無効なファイルパス:', validation.error);
@@ -90,86 +90,53 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
       return;
     }
 
-    // Electron環境の場合、直接ファイルを読み込み
-    if (isElectronEnvironment()) {
-      try {
-        console.log('🔄 Electron環境でPATH読み込み開始...');
-        const file = await loadElectronImageFromPath(cleanPath);
-        
-        if (file) {
-          await handleFileSelect(file);
-          console.log('✅ ElectronPATH読み込み完了:', file.name);
-          return;
-        }
-      } catch (error) {
-        console.error('❌ ElectronPATH読み込みエラー:', error);
-      }
-    }
-
-    // Web環境の場合、ファイル選択ダイアログを開く
+    // Web環境では、ファイル選択ダイアログを開く
     console.info('✅ 有効な画像パスが入力されました');
     console.info('🔒 Web環境のため、ファイル選択ダイアログを開きます...');
     fileInputRef.current?.click();
-  }, [pathInput, handleFileSelect]);
+  }, [pathInput]);
 
   /**
    * ファイル選択ハンドラ（モバイル対応版）
    */
   const handleFileChange = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    console.log('📁 ファイル選択:', file?.name);
+    debugLog('📁 ファイル選択:', file?.name);
     
     if (!file) {
-      console.log('⚠️ ファイルが選択されていません');
+      debugLog('⚠️ ファイルが選択されていません');
       return;
     }
 
     try {
-      console.log('🔄 画像読み込み開始...');
+      debugLog('🔄 画像読み込み開始...');
       
       // モバイル環境でHEIC/HEIF形式の場合、変換を試行
       let processedFile = file;
       if (isMobileEnvironment() && (file.type === 'image/heic' || file.type === 'image/heif')) {
-        console.log('📱 モバイル環境でHEIC/HEIF変換を実行...');
+        debugLog('📱 モバイル環境でHEIC/HEIF変換を実行...');
         processedFile = await convertHEICToJPEG(file);
       }
       
       await handleFileSelect(processedFile);
       setPathInput(processedFile.name);
       
-      console.log('✅ ファイル選択完了:', processedFile.name);
+      debugLog('✅ ファイル選択完了:', processedFile.name);
     } catch (err) {
       console.error('❌ ファイル選択エラー:', err);
     }
   }, [handleFileSelect]);
 
   /**
-   * 参照ボタンクリックハンドラ（Electron対応版）
+   * 参照ボタンクリックハンドラ（Web版）
    */
   const handleBrowseClick = useCallback(async () => {
-    console.log('🔘 参照ボタンクリック');
+    debugLog('🔘 参照ボタンクリック');
     
-    // Electron環境の場合、ネイティブダイアログを使用
-    if (isElectronEnvironment()) {
-      try {
-        console.log('📂 Electronファイル選択ダイアログを開きます...');
-        const file = await showElectronFileDialog();
-        
-        if (file) {
-          await handleFileSelect(file);
-          setPathInput(file.name);
-          console.log('✅ Electronファイル選択完了:', file.name);
-        }
-        return;
-      } catch (error) {
-        console.error('❌ Electronファイル選択エラー:', error);
-      }
-    }
-    
-    // Web環境の場合、通常のファイル選択
-    console.log('📂 Webファイル選択ダイアログを開きます...');
+    // Web環境では、通常のファイル選択
+    debugLog('📂 Webファイル選択ダイアログを開きます...');
     fileInputRef.current?.click();
-  }, [handleFileSelect]);
+  }, []);
 
   /**
    * Canvasクリックハンドラ
@@ -204,16 +171,16 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
     event.stopPropagation();
     
     const files = Array.from(event.dataTransfer.files);
-    console.log('📁 ドロップされたファイル:', files.map(f => f.name));
+    debugLog('📁 ドロップされたファイル:', files.map(f => f.name));
     
     if (files.length > 0) {
       const file = files[0];
-      console.log('🔄 ドロップファイル処理開始:', file.name);
+      debugLog('🔄 ドロップファイル処理開始:', file.name);
       
       try {
         await handleFileSelect(file);
         setPathInput(file.name);
-        console.log('✅ ドロップファイル処理完了:', file.name);
+        debugLog('✅ ドロップファイル処理完了:', file.name);
       } catch (err) {
         console.error('❌ ドロップファイル処理エラー:', err);
       }
