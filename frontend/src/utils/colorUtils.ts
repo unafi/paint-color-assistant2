@@ -1,4 +1,3 @@
-// import chroma from 'chroma-js'; // 将来使用予定
 import type { ColorModel, RgbColor, CmykColor, ColorUpdateSource } from '../types/color';
 
 /**
@@ -10,41 +9,60 @@ export class ColorSpaceConverter {
   private static lastUpdateSource: ColorUpdateSource | null = null;
 
   /**
-   * RGB値からCMYK値への変換
+   * RGB値からCMYK値への高精度変換（改良版）
    * @param r - 赤成分 (0-255)
    * @param g - 緑成分 (0-255) 
    * @param b - 青成分 (0-255)
-   * @returns CMYK値 (0-100%)
+   * @returns CMYK値 (0-100%、0.1%精度)
    */
   static rgbToCmyk(r: number, g: number, b: number): CmykColor {
-    // RGB値を0-1の範囲に正規化
-    const rNorm = r / 255;
-    const gNorm = g / 255;
-    const bNorm = b / 255;
+    // 入力値の正規化とクランプ（高精度）
+    const rNorm = Math.max(0, Math.min(255, Math.round(r))) / 255;
+    const gNorm = Math.max(0, Math.min(255, Math.round(g))) / 255;
+    const bNorm = Math.max(0, Math.min(255, Math.round(b))) / 255;
+
+    // 初期CMY値を計算
+    let c = 1 - rNorm;
+    let m = 1 - gNorm;
+    let y = 1 - bNorm;
 
     // K（黒）成分を計算
-    const k = 1 - Math.max(rNorm, Math.max(gNorm, bNorm));
+    const k = Math.min(c, Math.min(m, y));
     
-    // K=1の場合（完全な黒）の処理
-    if (k === 1) {
+    // 完全な黒の場合の特殊処理
+    if (k >= 0.9999) {
       return { c: 0, m: 0, y: 0, k: 100 };
     }
 
-    // CMY成分を計算
-    const c = (1 - rNorm - k) / (1 - k);
-    const m = (1 - gNorm - k) / (1 - k);
-    const y = (1 - bNorm - k) / (1 - k);
+    // CMY成分を正規化（改良版：より安全なゼロ除算対策）
+    const denominator = 1 - k;
+    if (denominator > 0.0001) { // より厳密な閾値
+      c = (c - k) / denominator;
+      m = (m - k) / denominator;
+      y = (y - k) / denominator;
+    } else {
+      // denominatorが0に近い場合は、CMYを0に設定
+      c = 0;
+      m = 0;
+      y = 0;
+    }
 
+    // 値の範囲制限（0-1）
+    c = Math.max(0, Math.min(1, c));
+    m = Math.max(0, Math.min(1, m));
+    y = Math.max(0, Math.min(1, y));
+
+    // 最終段階で0.1%精度に丸め
     return {
-      c: Math.round(c * 100 * 10) / 10, // 小数点以下1桁
-      m: Math.round(m * 100 * 10) / 10,
-      y: Math.round(y * 100 * 10) / 10,
-      k: Math.round(k * 100 * 10) / 10
+      c: Math.round(c * 1000) / 10, // 0.1%精度
+      m: Math.round(m * 1000) / 10,
+      y: Math.round(y * 1000) / 10,
+      k: Math.round(k * 1000) / 10
     };
   }
 
   /**
-   * CMYK値からRGB値への変換
+   * CMYK値からRGB値への高精度変換（改良版）
    * @param c - シアン成分 (0-100%)
    * @param m - マゼンタ成分 (0-100%)
    * @param y - イエロー成分 (0-100%)
@@ -52,73 +70,23 @@ export class ColorSpaceConverter {
    * @returns RGB値 (0-255)
    */
   static cmykToRgb(c: number, m: number, y: number, k: number): RgbColor {
-    // CMYK値を0-1の範囲に正規化
-    const cNorm = c / 100;
-    const mNorm = m / 100;
-    const yNorm = y / 100;
-    const kNorm = k / 100;
+    // 入力値の正規化とクランプ（0-100% → 0-1）
+    const cNorm = Math.max(0, Math.min(100, c)) / 100;
+    const mNorm = Math.max(0, Math.min(100, m)) / 100;
+    const yNorm = Math.max(0, Math.min(100, y)) / 100;
+    const kNorm = Math.max(0, Math.min(100, k)) / 100;
 
-    // RGB値を計算
+    // 改良版：より正確なRGB計算
+    // 標準的なCMYK→RGB変換式を使用
     const r = 255 * (1 - cNorm) * (1 - kNorm);
     const g = 255 * (1 - mNorm) * (1 - kNorm);
     const b = 255 * (1 - yNorm) * (1 - kNorm);
 
+    // 最終段階で整数に丸め（範囲制限付き）
     return {
       r: Math.round(Math.max(0, Math.min(255, r))),
       g: Math.round(Math.max(0, Math.min(255, g))),
       b: Math.round(Math.max(0, Math.min(255, b)))
-    };
-  }
-
-  /**
-   * CMYK値を比率調整（全体で100%になるように調整）
-   * @param c - シアン成分 (0-100%)
-   * @param m - マゼンタ成分 (0-100%)
-   * @param y - イエロー成分 (0-100%)
-   * @param k - 黒成分 (0-100%)
-   * @param changedComponent - 変更された成分
-   * @param newValue - 新しい値
-   * @returns 比率調整されたCMYK値
-   */
-  static adjustCmykRatio(
-    c: number, 
-    m: number, 
-    y: number, 
-    k: number,
-    changedComponent: 'c' | 'm' | 'y' | 'k',
-    newValue: number
-  ): CmykColor {
-    // 新しい値を設定
-    const values = { c, m, y, k };
-    values[changedComponent] = Math.max(0, Math.min(100, newValue));
-    
-    // 合計を計算
-    const total = values.c + values.m + values.y + values.k;
-    
-    // 100%を超えている場合のみ比率調整（通常のCMYK入力では調整しない）
-    if (total > 100) {
-      const excess = total - 100;
-      const otherComponents = (['c', 'm', 'y', 'k'] as const).filter(comp => comp !== changedComponent);
-      
-      // 他の成分から比例的に減らす
-      const otherTotal = otherComponents.reduce((sum, comp) => sum + values[comp], 0);
-      
-      if (otherTotal > 0) {
-        otherComponents.forEach(comp => {
-          const reduction = (values[comp] / otherTotal) * excess;
-          values[comp] = Math.max(0, values[comp] - reduction);
-        });
-      } else {
-        // 他の成分が0の場合、変更された成分を100に制限
-        values[changedComponent] = 100;
-      }
-    }
-    
-    return {
-      c: Math.round(values.c * 10) / 10,
-      m: Math.round(values.m * 10) / 10,
-      y: Math.round(values.y * 10) / 10,
-      k: Math.round(values.k * 10) / 10
     };
   }
 
@@ -159,6 +127,8 @@ export class ColorSpaceConverter {
   static getLastUpdateSource(): ColorUpdateSource | null {
     return this.lastUpdateSource;
   }
+
+
 }
 
 /**
